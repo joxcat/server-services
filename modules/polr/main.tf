@@ -1,23 +1,10 @@
-# Variables
-variable "polr_mysql_password" {
-  description = "Polr's MySQL password"
-  type = string
-}
-variable "polr_app_name" {
-  description = "Polr's displayed name"
-  type = string
-}
-variable "polr_app_address" {
-  description = "Polr's exposed host"
-  type = string
-}
-variable "polr_default_admin_username" {
-  description = "Polr's default admin username"
-  type = string
-}
-variable "polr_default_admin_password" {
-  description = "Polr's default admin password"
-  type = string
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 3.0"
+    }
+  }
 }
 
 # Definition
@@ -32,7 +19,7 @@ resource "docker_network" "polr" {
 resource "docker_container" "polr_database" {
   name = "polr_database"
   hostname = "polr_database"
-  image = docker_image.mysql_8.image_id
+  image = var.mysql_image 
   restart = "unless-stopped"
   
   networks_advanced {
@@ -50,6 +37,10 @@ resource "docker_container" "polr_database" {
     "MYSQL_PASSWORD=${var.polr_mysql_password}",
     "MYSQL_RANDOM_ROOT_PASSWORD=yes"
   ]
+
+  depends_on = [
+    docker_network.polr,
+  ]
 }
 
 resource "docker_container" "polr_frontend" {
@@ -58,10 +49,10 @@ resource "docker_container" "polr_frontend" {
   restart = "unless-stopped"
 
   networks_advanced {
-    name = docker_network.polr.id
+    name = var.network
   }
   networks_advanced {
-    name = docker_network.internal_proxy.id
+    name = docker_network.polr.id
   }
 
   env = [
@@ -72,5 +63,10 @@ resource "docker_container" "polr_frontend" {
     "ADMIN_USERNAME=${var.polr_default_admin_username}",
     "ADMIN_PASSWORD=${var.polr_default_admin_password}",
     "SETTING_SHORTEN_PERMISSION=true"
+  ]
+
+  depends_on = [
+    docker_network.polr,
+    docker_container.polr_database
   ]
 }

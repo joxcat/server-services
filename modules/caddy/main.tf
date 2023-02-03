@@ -1,17 +1,26 @@
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 3.0"
+    }
+  }
+}
+
 resource "docker_image" "caddy" {
   name = "caddy"
   build {
-    context = "caddy"
+    context = "modules/caddy"
   }
 }
 
 resource "docker_container" "caddy" {
-  name       = "caddy"
-  image      = docker_image.caddy.image_id
-  restart    = "unless-stopped"
-  entrypoint = ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+  name = "caddy"
+  image = docker_image.caddy.image_id
+  restart = "unless-stopped"
+  entrypoint = ["caddy", "run", "--watch", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
   networks_advanced {
-    name = docker_network.internal_proxy.id
+    name = var.network
   }
 
   volumes {
@@ -51,4 +60,9 @@ resource "docker_container" "caddy" {
     external = 443
     internal = 443
   }
+
+  depends_on = [
+    docker_image.caddy
+    
+  ]
 }
