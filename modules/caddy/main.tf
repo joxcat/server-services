@@ -63,6 +63,5 @@ resource "docker_container" "caddy" {
 
   depends_on = [
     docker_image.caddy
-    
   ]
 }
