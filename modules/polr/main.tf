@@ -34,7 +34,7 @@ resource "docker_container" "polr_database" {
   env = [
     "MYSQL_DATABASE=polr", 
     "MYSQL_USER=polr",
-    "MYSQL_PASSWORD=${var.polr_mysql_password}",
+    "MYSQL_PASSWORD=${var.mysql_password}",
     "MYSQL_RANDOM_ROOT_PASSWORD=yes"
   ]
 
@@ -45,6 +45,7 @@ resource "docker_container" "polr_database" {
 
 resource "docker_container" "polr_frontend" {
   name = "polr"
+  hostname = "polr"
   image = docker_image.polr.image_id
   restart = "unless-stopped"
 
@@ -57,11 +58,11 @@ resource "docker_container" "polr_frontend" {
 
   env = [
     "DB_HOST=polr_database",
-    "DB_PASSWORD=${var.polr_mysql_password}",
-    "APP_NAME=${var.polr_app_name}",
-    "APP_ADDRESS=${var.polr_app_address}",
-    "ADMIN_USERNAME=${var.polr_default_admin_username}",
-    "ADMIN_PASSWORD=${var.polr_default_admin_password}",
+    "DB_PASSWORD=${var.mysql_password}",
+    "APP_NAME=${var.app_name}",
+    "APP_ADDRESS=${var.app_address}",
+    "ADMIN_USERNAME=${var.default_admin_username}",
+    "ADMIN_PASSWORD=${var.default_admin_password}",
     "SETTING_SHORTEN_PERMISSION=true"
   ]
 

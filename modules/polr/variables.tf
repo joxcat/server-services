@@ -1,22 +1,22 @@
-variable "polr_mysql_password" {
+variable "mysql_password" {
   description = "Polr's MySQL password"
   type = string
   default = "polr"
 }
-variable "polr_app_name" {
+variable "app_name" {
   description = "Polr's displayed name"
   type = string
   default = "Polr"
 }
-variable "polr_app_address" {
+variable "app_address" {
   description = "Polr's exposed host"
   type = string
 }
-variable "polr_default_admin_username" {
+variable "default_admin_username" {
   description = "Polr's default admin username"
   type = string
 }
-variable "polr_default_admin_password" {
+variable "default_admin_password" {
   description = "Polr's default admin password"
   type = string
 }
