@@ -47,3 +47,9 @@ variable "rss_miniflux_database_password" {
   description = "RSS Miniflux's database password"
   type = string
 }
+
+# Wordpress Vic
+variable "wordpress_vic_database_password" {
+  description = "Wordpress's database password"
+  type = string
+}

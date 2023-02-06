@@ -67,3 +67,12 @@ module "rss-miniflux" {
   postgres_image = docker_image.postgres_latest.image_id
   database_password = var.rss_miniflux_database_password
 }
+
+module "wordpress-vic" {
+  source = "./modules/wordpress"
+  network = docker_network.internal_proxy.id
+
+  mysql_image = docker_image.mysql_8.image_id
+  resource_prefix = "vic"
+  database_password = var.wordpress_vic_database_password
+}
