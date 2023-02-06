@@ -53,3 +53,9 @@ variable "wordpress_vic_database_password" {
   description = "Wordpress's database password"
   type = string
 }
+
+# SearX
+variable "searx_host" {
+  description = "SearX's host"
+  type = string
+}

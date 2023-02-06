@@ -20,6 +20,9 @@ resource "docker_image" "mysql_8" {
 resource "docker_image" "postgres_latest" {
   name = "postgres:latest"
 }
+resource "docker_image" "redis" {
+  name = "redis:alpine"
+}
 
 # Modules
 module "caddy" {
@@ -75,4 +78,12 @@ module "wordpress-vic" {
   mysql_image = docker_image.mysql_8.image_id
   resource_prefix = "vic"
   database_password = var.wordpress_vic_database_password
+}
+
+module "searx" {
+  source = "./modules/searx"
+  network = docker_network.internal_proxy.id
+
+  redis_image = docker_image.redis.image_id
+  host = var.searx_host
 }

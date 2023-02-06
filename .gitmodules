@@ -1,3 +1,6 @@
 [submodule "modules/rss-bridge/source"]
 	path = modules/rss-bridge/source
 	url = https://github.com/RSS-Bridge/rss-bridge
+[submodule "modules/searx/source"]
+	path = modules/searx/source
+	url = https://github.com/joxcat/searxng
