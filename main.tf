@@ -23,6 +23,12 @@ resource "docker_image" "postgres_latest" {
 resource "docker_image" "redis" {
   name = "redis:alpine"
 }
+resource "docker_image" "redis_5" {
+  name = "redis:5"
+}
+resource "docker_image" "mongo_4" {
+  name = "mongo:4.0"
+}
 
 # Modules
 module "caddy" {
@@ -86,4 +92,12 @@ module "searx" {
 
   redis_image = docker_image.redis.image_id
   host = var.searx_host
+}
+
+module "overleaf" {
+  source = "./modules/overleaf"
+  network = docker_network.internal_proxy.id
+
+  redis_image = docker_image.redis_5.id
+  mongo_image = docker_image.mongo_4.id
 }
