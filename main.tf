@@ -53,14 +53,14 @@ module "rss-bridge" {
   network = docker_network.internal_proxy.id
 }
 
-module "shareftp" {
+/* module "shareftp" {
   source = "./modules/shareftp"
   network = docker_network.internal_proxy.id
 
   host = var.shareftp_host
   username = var.shareftp_username
   password = var.shareftp_password
-}
+} */
 
 module "filestash" {
   source = "./modules/filestash"

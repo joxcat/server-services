@@ -64,4 +64,8 @@ resource "docker_container" "code_server" {
     host_path = "/var/local/docker/code-server/ssh"
     container_path = "/user_home/.ssh"
   }
+
+  depends_on = [
+    docker_image.code_server
+  ]
 }
