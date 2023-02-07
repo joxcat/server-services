@@ -59,3 +59,13 @@ variable "searx_host" {
   description = "SearX's host"
   type = string
 }
+
+# Code-server
+variable "code_server_git_name" {
+  description = "Code Server Git name"
+  type = string
+}
+variable "code_server_git_email" {
+  description = "Code Server Git Email"
+  type = string
+}

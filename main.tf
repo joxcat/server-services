@@ -101,3 +101,11 @@ module "overleaf" {
   redis_image = docker_image.redis_5.id
   mongo_image = docker_image.mongo_4.id
 }
+
+module "code-server" {
+  source = "./modules/code-server"
+  network = docker_network.internal_proxy.id
+
+  git_name = var.code_server_git_name
+  git_email = var.code_server_git_email
+}
