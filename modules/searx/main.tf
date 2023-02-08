@@ -20,10 +20,10 @@ resource "docker_image" "searx" {
 
 resource "docker_container" "redis" {
   name = "searx_redis"
-  hostname = "searx_redis"
+  hostname = "redis"
   image = var.redis_image
   restart = "unless-stopped"
-  command = ["redis-server", "--save", "", "--appendonly", "no"]
+  command = ["redis-server", "--save", "\"\"", "--appendonly", "no"]
 
   networks_advanced {
     name = docker_network.searx.id
@@ -45,7 +45,7 @@ resource "docker_container" "redis" {
 
 resource "docker_container" "searx" {
   name = "searx"
-  hostname = "searx"
+  hostname = "searxng"
   image = docker_image.searx.image_id
   restart = "unless-stopped"
 
@@ -61,15 +61,15 @@ resource "docker_container" "searx" {
     container_path = "/etc/searxng"
   }
   volumes {
-    host_path = abspath("./modules/searx/source/engines")
+    host_path = abspath("./modules/searx/source/searx/engines")
     container_path = "/usr/local/searxng/searx/engines"
   }
   volumes {
     host_path = abspath("./modules/searx/source/plugins")
-    container_path = "/usr/local/searxng/searx/plugins"
+    container_path = "/usr/local/searxng/searx/searx/plugins"
   }
 
-  env = ["SEARXNG_BASE_URL=${var.host}"]
+  env = ["SEARXNG_BASE_URL=https://${var.host}"]
 
   capabilities {
     drop = ["ALL"]

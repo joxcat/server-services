@@ -17,8 +17,8 @@ resource "docker_network" "internal_proxy" {
 resource "docker_image" "mysql_8" {
   name = "mysql:8"
 }
-resource "docker_image" "postgres_latest" {
-  name = "postgres:latest"
+resource "docker_image" "postgres_14" {
+  name = "postgres:14"
 }
 resource "docker_image" "redis" {
   name = "redis:alpine"
@@ -73,7 +73,7 @@ module "rss-miniflux" {
   source = "./modules/rss-miniflux"
   network = docker_network.internal_proxy.id
 
-  postgres_image = docker_image.postgres_latest.image_id
+  postgres_image = docker_image.postgres_14.image_id
   database_password = var.rss_miniflux_database_password
 }
 
@@ -98,8 +98,8 @@ module "overleaf" {
   source = "./modules/overleaf"
   network = docker_network.internal_proxy.id
 
-  redis_image = docker_image.redis_5.id
-  mongo_image = docker_image.mongo_4.id
+  redis_image = docker_image.redis_5.image_id
+  mongo_image = docker_image.mongo_4.image_id
 }
 
 module "code-server" {

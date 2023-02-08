@@ -24,7 +24,7 @@ RUN tlmgr install microtype
 
 RUN tlmgr install minted fvextra etoolbox fancyvrb upquote lineno catchfile xstring framed float xcolor
 RUN apt-get update && apt-get install -y python-pygments
-RUN echo 'shell_escape = t' >> /usr/local/texlive/2021/texmf.cnf
+RUN echo 'shell_escape = t' >> /usr/local/texlive/2022/texmf.cnf
 RUN apt-get clean
 RUN tlmgr install todonotes
 RUN tlmgr install setspace

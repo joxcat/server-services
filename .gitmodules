@@ -4,3 +4,4 @@
 [submodule "modules/searx/source"]
 	path = modules/searx/source
 	url = https://github.com/joxcat/searxng
+	branch = custom-conf

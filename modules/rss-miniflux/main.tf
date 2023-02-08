@@ -17,7 +17,7 @@ resource "docker_image" "miniflux" {
 
 resource "docker_container" "miniflux_database" {
   name = "miniflux_database"
-  hostname = "db"
+  hostname = "miniflux_database"
   image = var.postgres_image
   restart = "unless-stopped"
 
@@ -61,7 +61,7 @@ resource "docker_container" "miniflux" {
   }
 
   env = [
-    "DATABASE_URL=postgres://miniflux:${var.database_password}@db/miniflux?sslmode=disable"
+    "DATABASE_URL=postgres://miniflux:${var.database_password}@miniflux_database/miniflux?sslmode=disable"
   ]
 
   depends_on = [

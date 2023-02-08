@@ -28,10 +28,12 @@ resource "docker_container" "code_server" {
   user = "${var.user_id}:${var.user_group}"
 
   memory = var.memory_limit
+  memory_swap = var.memory_limit
 
   devices {
     host_path = "/dev/fuse"
     container_path = "/dev/fuse"
+    permissions = "rwm"
   }
 
   networks_advanced {
