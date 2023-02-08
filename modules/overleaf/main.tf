@@ -81,13 +81,13 @@ resource "docker_container" "overleaf" {
   }
 
   env = [
-    "SHARELATEX_APP_NAME=\"Overleaf Community Edition\"",
+    "SHARELATEX_APP_NAME=Overleaf Community Edition",
     "SHARELATEX_MONGO_URL=mongodb://mongo/sharelatex",
     "SHARELATEX_REDIS_HOST=redis",
     "REDIS_HOST=redis",
-    "ENABLED_LINKED_FILE_TYPES='project_file,project_output_file'",
-    "ENABLE_CONVERSIONS='true'",
-    "EMAIL_CONFIRMATION_DISABLED='true'",
+    "ENABLED_LINKED_FILE_TYPES=project_file,project_output_file",
+    "ENABLE_CONVERSIONS=true",
+    "EMAIL_CONFIRMATION_DISABLED=true",
     "TEXMFVAR=/var/lib/sharelatex/tmp/texmf-var"
   ]
 

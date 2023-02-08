@@ -41,7 +41,7 @@ resource "docker_container" "code_server" {
   }
 
   env = [
-    "EXTENSIONS_GALLERY='{\"serviceUrl\": \"https://marketplace.visualstudio.com/_apis/public/gallery\",\"cacheUrl\":\"https://vscode.blob.core.windows.net/gallery/index\",\"itemUrl\":\"https://marketplace.visualstudio.com/items\"}'"
+    "EXTENSIONS_GALLERY={\"serviceUrl\": \"https://marketplace.visualstudio.com/_apis/public/gallery\",\"cacheUrl\":\"https://vscode.blob.core.windows.net/gallery/index\",\"itemUrl\":\"https://marketplace.visualstudio.com/items\"}"
   ]
 
   // Needed for fuse
