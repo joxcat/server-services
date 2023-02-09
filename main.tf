@@ -118,4 +118,5 @@ module "coder" {
   postgres_password = var.coder_postgres_password 
   access_url = var.coder_access_url
   wildcard_url = var.coder_wildcard_url
+  docker_group_id = "974"
 }

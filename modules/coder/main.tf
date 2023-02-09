@@ -77,7 +77,7 @@ resource "docker_container" "coder" {
     container_path = "/var/run/docker.sock"
   }
 
-  group_add = ["998"]
+  group_add = [var.docker_group_id]
 
   depends_on = [
     docker_network.coder,
