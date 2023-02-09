@@ -109,3 +109,13 @@ module "code-server" {
   git_name = var.code_server_git_name
   git_email = var.code_server_git_email
 }
+
+module "coder" {
+  source = "./modules/coder"
+  network = docker_network.internal_proxy.id
+
+  postgres_image = docker_image.postgres_14.image_id
+  postgres_password = var.coder_postgres_password 
+  access_url = var.coder_access_url
+  wildcard_url = var.coder_wildcard_url
+}

@@ -69,3 +69,17 @@ variable "code_server_git_email" {
   description = "Code Server Git Email"
   type = string
 }
+
+# Coder
+variable "coder_postgres_password" {
+  description = "Coder's postgres password"
+  type = string
+} 
+variable "coder_access_url" {
+  description = "Coder's access url"
+  type = string
+}
+variable "coder_wildcard_url" {
+  description = "Coder's wildcard matching url"
+  type = string
+}
