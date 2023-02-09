@@ -13,11 +13,13 @@ terraform {
 
 variable "git_repo" {
   description = "Default git repository"
-  default = null
+  default = ""
+  sensitive = false
 }
 variable "node_version" {
   description = "Installed node version"
   default = "16"
+  sensitive = false
 }
 
 locals {
