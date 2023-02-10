@@ -31,7 +31,8 @@ resource "coder_agent" "main" {
     sudo chown coder:coder ~/.local/share
 
     # install and start code-server
-    curl -fsSL https://code-server.dev/install.sh | sh
+    export EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl":"https://vscode.blob.core.windows.net/gallery/index","itemUrl":"https://marketplace.visualstudio.com/items"}'
+    curl -fsSL https://code-server.dev/install.sh | sh -s -- --version 4.9.1
     code-server --auth none --port 13337
     
     EOF
@@ -141,10 +142,15 @@ resource "docker_container" "workspace" {
     value = data.coder_workspace.me.name
   }
 
+  # Needed for fuse
   devices {
     host_path = "/dev/fuse"
     container_path = "/dev/fuse"
     permissions = "rwm"
   }
+  capabilities {
+    add = ["SYS_ADMIN"]
+  }
+  security_opts = ["apparmor:unconfined"]
 }
 
