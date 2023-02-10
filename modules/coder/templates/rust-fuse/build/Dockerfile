@@ -57,18 +57,13 @@ RUN git clone https://github.com/rui314/mold.git --depth 1 --branch v1.10.1 && \
     cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/usr/bin/clang++ .. && \
     cmake --build . -j $(nproc) && \
     cmake --install . && \
-    cd .. && \
+    cd ../.. && \
     rm -rf mold
 USER ${USER}
 SHELL ["/bin/bash", "--login", "-c"]
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH=$PATH:$HOME/.cargo/bin
 # Rust-analyser
-# RUN git clone https://github.com/rust-lang/rust-analyzer.git $HOME/rust-analyzer --depth 1 --branch 2022-05-02 # && \
-    # cd $HOME/rust-analyzer && \
-    # cargo xtask install --server && \
-    # cd .. \
-    # rm -rf rust-analyzer
 RUN rustup component add clippy rustfmt rust-analyzer
 RUN rustup +nightly component add clippy rustfmt rust-analyzer
 RUN mkdir -p $HOME/.cargo/bin && \

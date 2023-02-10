@@ -52,7 +52,7 @@ resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/${local.username}"
+  url          = "http://localhost:13337/?folder=/home/coder"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
@@ -94,7 +94,7 @@ resource "docker_volume" "home_volume" {
 
 
 resource "docker_image" "main" {
-  name = "coder-base"
+  name = "coder-rust-fuse"
   build {
     path      = "./build"
     tag       = ["coder-base:v0.1"]
