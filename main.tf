@@ -29,6 +29,9 @@ resource "docker_image" "redis_5" {
 resource "docker_image" "mongo_4" {
   name = "mongo:4.0"
 }
+resource "docker_image" "mariadb" {
+  name = "mariadb:latest"
+}
 
 # Modules
 module "caddy" {
@@ -119,4 +122,12 @@ module "coder" {
   access_url = var.coder_access_url
   wildcard_url = var.coder_wildcard_url
   docker_group_id = "974"
+}
+
+module "writefreely" {
+  source = "./modules/writefreely"
+  network = docker_network.internal_proxy.id
+
+  mariadb_image = docker_image.mariadb.image_id
+  mariadb_password = var.writefreely_mariadb_password
 }

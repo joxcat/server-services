@@ -83,3 +83,9 @@ variable "coder_wildcard_url" {
   description = "Coder's wildcard matching url"
   type = string
 }
+
+# Writefreely
+variable "writefreely_mariadb_password" {
+  description = "Writefreely's mariaDB root password"
+  type = string
+}
