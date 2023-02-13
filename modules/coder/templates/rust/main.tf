@@ -11,27 +11,37 @@ terraform {
   }
 }
 
+variable "git_repo" {
+  description = "Default git repository"
+  default = ""
+  sensitive = false
+}
+
 locals {
   username = data.coder_workspace.me.owner
 }
 
-data "coder_provisioner" "me" {
-}
+data "coder_provisioner" "me" {}
 
-provider "docker" {
-}
+provider "docker" {}
 
-data "coder_workspace" "me" {
-}
+data "coder_workspace" "me" {}
 
 resource "coder_agent" "main" {
   arch           = data.coder_provisioner.me.arch
   os             = "linux"
   startup_script = <<EOF
     #!/bin/sh
+
+    sudo chown coder:coder ~/.local
+    sudo chown coder:coder ~/.local/share
+
+    if [ ! -z "${var.git_repo}" ]; then git clone ${var.git_repo}; fi
+
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh
     code-server --auth none --port 13337
+    
     EOF
 
   # These environment variables allow you to make Git commits right away after creating a
@@ -50,7 +60,7 @@ resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/${local.username}"
+  url          = "http://localhost:13337/?folder=/home/coder${var.git_repo != "" ? "/${regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", var.git_repo).folder}" : ""}"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
@@ -92,12 +102,10 @@ resource "docker_volume" "home_volume" {
 
 
 resource "docker_image" "main" {
-  name = "coder-${data.coder_workspace.me.id}"
+  name = "coder-base"
   build {
-    path = "./build"
-    build_arg = {
-      USER = local.username
-    }
+    path      = "./build"
+    tag       = ["coder-base:v0.1"]
   }
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
@@ -119,7 +127,7 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/${local.username}"
+    container_path = "/home/coder/"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
@@ -141,3 +149,4 @@ resource "docker_container" "workspace" {
     value = data.coder_workspace.me.name
   }
 }
+

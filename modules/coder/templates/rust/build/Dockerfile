@@ -1,90 +1,75 @@
-FROM ubuntu
+FROM ubuntu:20.04
 
-ARG LC_ALL=C
-ARG DEBIAN_FRONTEND="noninteractive"
+RUN apt-get update && \
+    DEBIAN_FRONTEND="noninteractive" apt-get install --yes \
+    bash \
+    build-essential \
+    ca-certificates \
+    curl \
+    htop \
+    locales \
+    man \
+    python3 \
+    python3-pip \
+    software-properties-common \
+    sudo \
+    systemd \
+    systemd-sysv \
+    unzip \
+    wget \
+    fontconfig && \
+    # Install latest Git using their official PPA
+    add-apt-repository ppa:git-core/ppa && \
+    DEBIAN_FRONTEND="noninteractive" apt-get install --yes git
 
-RUN apt-get update \
-  && apt-get install --no-install-recommends -y \
-  apt-transport-https \
-  bash \
-  ca-certificates \
-  curl \
-  git \
-  sudo \
-  vim \
-  wget \
-  locales \
-  make \
-  cmake \
-  build-essential \
-  pkg-config \
-  libssl-dev \
-  zlib1g-dev \
-  gcc \
-  g++ \
-  llvm \
-  file \
-  musl-dev\
-  musl-tools \
-  linux-tools-common \
-  linux-tools-generic \
-  strace \
-  clang \
-  lld \
-  binaryen \
-  sqlite3 \
-  python3 \
-  python3-pip \
-  && rm -rf /var/lib/apt/lists/*
-
-# Build and install mold linker
-RUN cd /tmp && \
-    git clone https://github.com/rui314/mold.git --depth 1 --branch v1.9.0
-RUN cd /tmp/mold && \
-    mkdir build && \
-    cd build && \
-    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=c++ .. && \
-    cmake --build . -j $(nproc)
-RUN cd /tmp/mold/build && \
-    cmake --install . && \
-    cd / && \
-    rm -rf /tmp/mold
-
+# Add a user `coder` so that you're not developing as the `root` user
 ARG USER=coder
-RUN useradd --groups sudo --shell=/bin/bash --create-home ${USER} \
-    && echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
-    && chmod 0440 /etc/sudoers.d/${USER}
+
+RUN useradd ${USER} \
+    --create-home \
+    --shell=/bin/bash \
+    --uid=1000 \
+    --user-group && \
+    echo "coder ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
+
 USER ${USER}
 WORKDIR /home/${USER}
-ENV HOME=/home/${USER}
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH=$PATH:${HOME}/.cargo/bin
+# Setup git
+RUN git config --global init.defaultBranch main
 
-RUN rustup component add clippy rustfmt rust-analyzer
-RUN rustup +nightly component add clippy rustfmt rust-analyzer
+# Add custom fonts
+RUN mkdir $HOME/.fonts || true
+RUN cd $HOME/.fonts && \
+    curl -sSL -o iosevka.tar.gz https://github.com/joxcat/Iosevka-custom-conf/releases/download/v1.2.0/iosevka.tar.gz && \
+    tar -xf iosevka.tar.gz && \
+    rm iosevka.tar.gz && \
+    fc-cache -f
 
-# Targets
-RUN rustup target add wasm32-unknown-unknown
-RUN rustup target add x86_64-unknown-linux-musl
+# set env variables
 
-# Kani tests
-RUN cargo install --locked kani-verifier && \
-    cargo-kani setup
-
-# Add Cranelift compiler
-ARG GIT_EMAIL="coder@example.org"
-RUN git config --global user.email ${GIT_EMAIL}
-ARG GIT_NAME="coder"
-RUN git config --global user.name ${GIT_NAME}
-RUN git clone https://github.com/bjorn3/rustc_codegen_cranelift.git /tmp/rustc_codegen_cranelift --depth 1 && \
-    cd /tmp/rustc_codegen_cranelift && \
-    ./y.rs prepare && \
-    ./y.rs build
-RUN cp /tmp/rustc_codegen_cranelift/dist/cargo-clif "$HOME/.cargo/bin"
-
-RUN cargo install --locked cargo-bloat cargo-expand cargo-watch cargo-nextest sea-orm-cli
-
-USER 0
-RUN rm -rf /tmp/*
+# setup rust
+USER 0:0
+RUN apt-get install -y --no-install-recommends \
+    lld \
+    binaryen \
+    clang \
+    pkg-config \
+    libstdc++-10-dev \
+    cmake \
+    libssl-dev
+RUN git clone https://github.com/rui314/mold.git --depth 1 --branch v1.10.1 /home/${USER}/mold && \
+    mkdir /home/${USER}/mold/build && \
+    cd /home/${USER}/mold/build && \
+    cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/usr/bin/clang++ .. && \
+    cmake --build . -j $(nproc) && \
+    cmake --install . && \
+    cd / && \
+    rm -rf /home/${USER}/mold
 USER ${USER}
+SHELL ["/bin/bash", "--login", "-c"]
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH=$PATH:$HOME/.cargo/bin
+# Rust-analyser
+RUN rustup component add clippy rustfmt rust-analyzer
+
