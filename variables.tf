@@ -84,3 +84,29 @@ variable "coder_wildcard_url" {
   type = string
 }
 
+# Ghost
+variable "ghost_mysql_password" {
+  description = "Ghost MySQL database's password"
+  type = string
+}
+variable "ghost_public_url" {
+  description = "Ghost public facing url"
+  type = string
+}
+variable "ghost_smtp_host" {
+  description = "Ghost SMTP server host"
+  type = string
+}
+variable "ghost_smtp_user" {
+  description = "Ghost SMTP user"
+  type = string
+}
+variable "ghost_smtp_password" {
+  description = "Ghost SMTP password"
+  type = string
+}
+variable "ghost_smtp_from" {
+  description = "Ghost SMTP From value"
+  type = string
+}
+

@@ -123,3 +123,16 @@ module "coder" {
   wildcard_url = var.coder_wildcard_url
   docker_group_id = "974"
 }
+
+module "ghost" {
+  source = "./modules/ghost"
+  network = docker_network.internal_proxy.id
+
+  mysql_image = docker_image.mysql_8.image_id
+  mysql_password = var.ghost_mysql_password
+  public_url = var.ghost_public_url
+  smtp_host = var.ghost_smtp_host
+  smtp_user = var.ghost_smtp_user
+  smtp_password = var.ghost_smtp_password
+  smtp_from = var.ghost_smtp_from
+}
