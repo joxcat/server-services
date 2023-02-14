@@ -84,8 +84,3 @@ variable "coder_wildcard_url" {
   type = string
 }
 
-# Writefreely
-variable "writefreely_mariadb_password" {
-  description = "Writefreely's mariaDB root password"
-  type = string
-}
