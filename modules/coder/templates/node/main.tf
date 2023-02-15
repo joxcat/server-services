@@ -65,7 +65,7 @@ resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/coder"
+  url          = "http://localhost:13337/?folder=/home/coder${var.git_repo != "" ? "/${regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", var.git_repo).folder}" : ""}"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
@@ -110,7 +110,6 @@ resource "docker_image" "main" {
   name = "coder-node"
   build {
     path      = "./build"
-    tag       = ["coder-base:v0.1"]
 
     build_arg = {
       NODE_VERSION: var.node_version

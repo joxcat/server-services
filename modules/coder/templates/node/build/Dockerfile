@@ -16,6 +16,7 @@ RUN apt-get update && \
     systemd \
     systemd-sysv \
     unzip \
+    fontconfig \
     wget && \
     # Install latest Git using their official PPA
     add-apt-repository ppa:git-core/ppa && \
@@ -40,6 +41,14 @@ SHELL ["/bin/bash", "--login", "-c"]
 
 # Setup git
 RUN git config --global init.defaultBranch main
+
+# Add custom fonts
+RUN mkdir $HOME/.fonts || true
+RUN cd $HOME/.fonts && \
+    curl -sSL -o iosevka.tar.gz https://github.com/joxcat/Iosevka-custom-conf/releases/download/v1.2.0/iosevka.tar.gz && \
+    tar -xf iosevka.tar.gz && \
+    rm iosevka.tar.gz && \
+    fc-cache -f
 
 # set env variables
 
