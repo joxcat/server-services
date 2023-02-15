@@ -60,6 +60,7 @@ resource "docker_container" "ghost" {
     "privacy__useGravatar=false",
     "privacy__useRpcPing=false",
     "privacy__useStructuredData=false",
+    "privacy__useUpdateCheck=false",
     "mail__transport=SMTP",
     "mail__from=${var.smtp_from}",
     "mail__options__host=${var.smtp_host}",
