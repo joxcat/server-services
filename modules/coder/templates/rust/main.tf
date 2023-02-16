@@ -36,7 +36,7 @@ resource "coder_agent" "main" {
     sudo chown coder:coder ~/.local
     sudo chown coder:coder ~/.local/share
 
-    if [ ! -z "${var.git_repo}" ]; then git clone ${var.git_repo}; fi
+    if [ ! -z "${var.git_repo}" ]; then env GIT_SSH_COMMAND="$GIT_SSH_COMMAND -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone ${var.git_repo}; fi
 
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh

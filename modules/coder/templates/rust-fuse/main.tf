@@ -11,6 +11,12 @@ terraform {
   }
 }
 
+variable "git_repo" {
+  description = "Default git repository"
+  default = ""
+  sensitive = false
+}
+
 locals {
   username = data.coder_workspace.me.owner
 }
@@ -30,8 +36,10 @@ resource "coder_agent" "main" {
     sudo chown coder:coder ~/.local
     sudo chown coder:coder ~/.local/share
 
+    if [ ! -z "${var.git_repo}" ]; then env GIT_SSH_COMMAND="$GIT_SSH_COMMAND -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone ${var.git_repo}; fi
+
     # install and start code-server
-    export EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl":"https://vscode.blob.core.windows.net/gallery/index","itemUrl":"https://marketplace.visualstudio.com/items"}'
+    # export EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl":"https://vscode.blob.core.windows.net/gallery/index","itemUrl":"https://marketplace.visualstudio.com/items"}'
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --version 4.9.1
     code-server --auth none --port 13337
     
@@ -53,7 +61,7 @@ resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/coder"
+  url          = "http://localhost:13337/?folder=/home/coder${var.git_repo != "" ? "/${regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", var.git_repo).folder}" : ""}"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
