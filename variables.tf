@@ -110,3 +110,32 @@ variable "ghost_smtp_from" {
   type = string
 }
 
+# Pterodactyl
+variable "pterodactyl_app_url" {
+  description = "Pterodactyl Public app url"
+  type = string
+}
+variable "pterodactyl_mail" {
+  description = "Pterodactyl Platform service email"
+  type = string
+}
+variable "pterodactyl_mariadb_password" {
+  description = "Pterodactyl MariaDB password"
+  type = string
+}
+variable "pterodactyl_smtp_host" {
+  description = "Pterodactyl SMTP Host"
+  type = string
+}
+variable "pterodactyl_smtp_password" {
+  description = "Pterodactyl SMTP Password"
+  type = string
+}
+variable "pterodactyl_smtp_port" {
+  description = "Pterodactyl SMTP Port"
+  type = string
+}
+variable "pterodactyl_smtp_username" {
+  description = "Pterodactyl SMTP Username"
+  type = string
+}

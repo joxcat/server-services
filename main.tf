@@ -32,6 +32,9 @@ resource "docker_image" "mongo_4" {
 resource "docker_image" "mariadb" {
   name = "mariadb:latest"
 }
+resource "docker_image" "mariadb_10" {
+  name = "mariadb:10.5"
+}
 
 # Modules
 module "caddy" {
@@ -135,4 +138,19 @@ module "ghost" {
   smtp_user = var.ghost_smtp_user
   smtp_password = var.ghost_smtp_password
   smtp_from = var.ghost_smtp_from
+}
+
+module "pterodactyl" {
+  source = "./modules/pterodactyl"
+  network = docker_network.internal_proxy.id
+
+  mariadb_image = docker_image.mariadb_10.image_id
+  redis_image = docker_image.redis.image_id
+  mariadb_password = var.pterodactyl_mariadb_password
+  app_url = var.pterodactyl_app_url
+  mail = var.pterodactyl_mail
+  smtp_host = var.pterodactyl_smtp_host
+  smtp_port = var.pterodactyl_smtp_port
+  smtp_username = var.pterodactyl_smtp_username
+  smtp_password = var.pterodactyl_smtp_password
 }
