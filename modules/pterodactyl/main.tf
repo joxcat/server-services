@@ -12,7 +12,11 @@ resource "docker_network" "pterodactyl" {
 }
 
 resource "docker_image" "pterodactyl" {
-  name = "ghcr.io/pterodactyl/panel:latest"
+  name = "ghcr.io/pterodactyl/panel:v1.9.2"
+}
+
+resource "docker_image" "pterodactyl_wings" {
+  name = "ghcr.io/pterodactyl/wings:v1.7.2"
 }
 
 resource "docker_container" "pterodactyl_redis" {
@@ -82,13 +86,17 @@ resource "docker_container" "pterodactyl" {
     container_path = "/etc/letsencrypt"
   }
   volumes {
-    host_path = "/var/local/docker/pterodactyl/logs"
+    host_path = "/var/local/docker/pterodactyl/storage_logs"
     container_path = "/app/storage/logs"
+  }
+  volumes {
+    host_path = "/var/local/docker/pterodactyl/logs"
+    container_path = "/var/log"
   }
 
   env = [
     "APP_URL=${var.app_url}",
-    "APP_TIMEZONE=UTC+1",
+    "APP_TIMEZONE=Europe/Paris",
     "APP_SERVICE_AUTHOR=${var.mail}",
     "MAIL_FROM=${var.mail}",
     "MAIL_DRIVER=smtp",
@@ -110,6 +118,65 @@ resource "docker_container" "pterodactyl" {
 
   depends_on = [
     docker_network.pterodactyl,
-    var.network
+    var.network,
+    docker_image.pterodactyl
+  ]
+}
+
+resource "docker_container" "pterodactyl_wings1" {
+  name = "pterodactyl_wings1"
+  hostname = "pterodactyl_wings1"
+  image = docker_image.pterodactyl_wings.image_id
+  restart = "unless-stopped"
+
+  env = [
+    "TZ=Europe/Paris",
+    "WINGS_UID=974",
+    "WINGS_GID=974",
+    "WINGS_USERNAME=pterodactyl"
+  ]
+
+  networks_advanced {
+    name = docker_network.pterodactyl.id
+  }
+
+  volumes {
+    host_path = "/var/run/docker.sock"
+    container_path = "/var/run/docker.sock"
+  }
+  volumes {
+    host_path = "/var/lib/docker/containers"
+    container_path = "/var/lib/docker/containers"
+  }
+  volumes {
+    host_path = "/tmp/pterodactyl"
+    container_path = "/tmp/pterodactyl"
+  }
+  volumes {
+    host_path = "/etc/ssl/certs"
+    container_path = "/etc/ssl/certs"
+    read_only = true
+  }
+  volumes {
+    host_path = "/var/local/docker/pterodactyl/wings1/etc"
+    container_path = "/etc/pterodactyl"
+  }
+  volumes {
+    host_path = "/var/local/docker/pterodactyl/wings1/logs"
+    container_path = "/var/log/pterodactyl"
+  }
+  volumes {
+    host_path = "/var/local/docker/pterodactyl/wings1/lib"
+    container_path = "/var/lib/pterodactyl"
+  }
+  volumes {
+    host_path = "/var/local/docker/pterodactyl/wings1/data"
+    container_path = "/var/lib/pterodactyl/volumes"
+  }
+
+  depends_on = [
+    docker_network.pterodactyl,
+    var.network,
+    docker_image.pterodactyl
   ]
 }
