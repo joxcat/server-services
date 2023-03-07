@@ -156,6 +156,11 @@ resource "docker_container" "pterodactyl_wings1" {
     name = docker_network.pterodactyl_wings.id
   }
 
+  ports {
+    internal = 2022
+    external = 2022
+  }
+
   volumes {
     host_path = "/var/run/docker.sock"
     container_path = "/var/run/docker.sock"
