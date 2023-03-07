@@ -11,12 +11,23 @@ resource "docker_network" "pterodactyl" {
   name = "internal_pterodactyl"
 }
 
+resource "docker_network" "pterodactyl_wings" {
+  name = "pterodactyl_nw"
+  driver = "bridge"
+  ipam_config {
+    subnet = "172.21.0.0/16"
+  }
+  options = {
+    "com.docker.network.bridge.name" = "pterodactyl_nw"
+  }
+}
+
 resource "docker_image" "pterodactyl" {
-  name = "ghcr.io/pterodactyl/panel:v1.9.2"
+  name = "ghcr.io/pterodactyl/panel:latest"
 }
 
 resource "docker_image" "pterodactyl_wings" {
-  name = "ghcr.io/pterodactyl/wings:v1.7.2"
+  name = "ghcr.io/pterodactyl/wings:latest"
 }
 
 resource "docker_container" "pterodactyl_redis" {
@@ -98,6 +109,7 @@ resource "docker_container" "pterodactyl" {
     "APP_URL=${var.app_url}",
     "APP_TIMEZONE=Europe/Paris",
     "APP_SERVICE_AUTHOR=${var.mail}",
+    "APP_DEBUG=true",
     "MAIL_FROM=${var.mail}",
     "MAIL_DRIVER=smtp",
     "MAIL_HOST=${var.smtp_host}",
@@ -106,7 +118,7 @@ resource "docker_container" "pterodactyl" {
     "MAIL_PASSWORD=${var.smtp_password}",
     "MAIL_ENCRYPTION=true",
     "DB_PASSWORD=${var.mariadb_password}",
-    "APP_ENV=production",
+    "APP_ENV=development",
     "APP_ENVIRONMENT_ONLY=false",
     "CACHE_DRIVER=redis",
     "SESSION_DRIVER=redis",
@@ -130,14 +142,18 @@ resource "docker_container" "pterodactyl_wings1" {
   restart = "unless-stopped"
 
   env = [
-    "TZ=Europe/Paris",
-    "WINGS_UID=974",
-    "WINGS_GID=974",
+    "TZ=UTC",
+    "WINGS_UID=988",
+    "WINGS_GID=988",
     "WINGS_USERNAME=pterodactyl"
   ]
 
   networks_advanced {
-    name = docker_network.pterodactyl.id
+    name = var.network
+  }
+
+  networks_advanced {
+    name = docker_network.pterodactyl_wings.id
   }
 
   volumes {
@@ -151,11 +167,6 @@ resource "docker_container" "pterodactyl_wings1" {
   volumes {
     host_path = "/tmp/pterodactyl"
     container_path = "/tmp/pterodactyl"
-  }
-  volumes {
-    host_path = "/etc/ssl/certs"
-    container_path = "/etc/ssl/certs"
-    read_only = true
   }
   volumes {
     host_path = "/var/local/docker/pterodactyl/wings1/etc"
@@ -175,8 +186,8 @@ resource "docker_container" "pterodactyl_wings1" {
   }
 
   depends_on = [
-    docker_network.pterodactyl,
     var.network,
-    docker_image.pterodactyl
+    docker_network.pterodactyl_wings,
+    docker_image.pterodactyl_wings
   ]
 }
