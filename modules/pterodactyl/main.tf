@@ -143,8 +143,8 @@ resource "docker_container" "pterodactyl_wings1" {
 
   env = [
     "TZ=UTC",
-    "WINGS_UID=988",
-    "WINGS_GID=988",
+    "WINGS_UID=956",
+    "WINGS_GID=956",
     "WINGS_USERNAME=pterodactyl"
   ]
 
@@ -179,14 +179,18 @@ resource "docker_container" "pterodactyl_wings1" {
   }
   volumes {
     host_path = "/var/local/docker/pterodactyl/wings1/logs"
-    container_path = "/var/log/pterodactyl"
+    container_path = "/var/local/docker/pterodactyl/wings1/logs"
   }
   volumes {
     host_path = "/var/local/docker/pterodactyl/wings1/lib"
-    container_path = "/var/lib/pterodactyl"
+    container_path = "/var/local/docker/pterodactyl/wings1/lib"
   }
   volumes {
-    host_path = "/var/local/docker/pterodactyl/wings1/data"
+    host_path = "/var/local/docker/pterodactyl/wings1/lib/volumes"
+    container_path = "/var/local/docker/pterodactyl/wings1/lib/volumes"
+  }
+  volumes {
+    host_path = "/var/local/docker/pterodactyl/wings1/lib/volumes"
     container_path = "/var/lib/pterodactyl/volumes"
   }
 

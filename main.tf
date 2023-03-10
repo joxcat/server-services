@@ -116,7 +116,7 @@ module "code-server" {
   git_email = var.code_server_git_email
 }
 
-module "coder" {
+/* module "coder" {
   source = "./modules/coder"
   network = docker_network.internal_proxy.id
 
@@ -125,7 +125,7 @@ module "coder" {
   access_url = var.coder_access_url
   wildcard_url = var.coder_wildcard_url
   docker_group_id = "974"
-}
+} */
 
 module "ghost" {
   source = "./modules/ghost"
