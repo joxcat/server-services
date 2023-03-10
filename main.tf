@@ -108,15 +108,15 @@ module "overleaf" {
   mongo_image = docker_image.mongo_4.image_id
 }
 
-module "code-server" {
+/* module "code-server" {
   source = "./modules/code-server"
   network = docker_network.internal_proxy.id
 
   git_name = var.code_server_git_name
   git_email = var.code_server_git_email
-}
+} */
 
-/* module "coder" {
+module "coder" {
   source = "./modules/coder"
   network = docker_network.internal_proxy.id
 
@@ -125,7 +125,7 @@ module "code-server" {
   access_url = var.coder_access_url
   wildcard_url = var.coder_wildcard_url
   docker_group_id = "974"
-} */
+}
 
 module "ghost" {
   source = "./modules/ghost"
