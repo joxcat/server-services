@@ -41,6 +41,9 @@ resource "coder_agent" "main" {
     # install and start code-server
     # export EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl":"https://vscode.blob.core.windows.net/gallery/index","itemUrl":"https://marketplace.visualstudio.com/items"}'
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --version 4.9.1
+    code-server --install-extension rust-lang.rust-analyzer
+    code-server --install-extension tamasfe.even-better-toml
+    code-server --install-extension usernamehw.errorlens
     code-server --auth none --port 13337
     
     EOF
