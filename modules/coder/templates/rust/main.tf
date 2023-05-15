@@ -2,11 +2,11 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.6.0"
+      version = "0.7.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "~> 2.22"
+      version = "~> 3.0"
     }
   }
 }
@@ -107,7 +107,7 @@ resource "docker_volume" "home_volume" {
 resource "docker_image" "main" {
   name = "coder-rust"
   build {
-    path      = "./build"
+    context = "./build"
   }
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))

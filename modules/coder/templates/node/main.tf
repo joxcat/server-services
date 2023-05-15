@@ -2,11 +2,11 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.6.0"
+      version = "0.7.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "~> 2.22"
+      version = "~> 3.0"
     }
   }
 }
@@ -109,7 +109,7 @@ resource "docker_volume" "home_volume" {
 resource "docker_image" "main" {
   name = "coder-node"
   build {
-    path      = "./build"
+    context = "./build"
 
     build_arg = {
       NODE_VERSION: var.node_version

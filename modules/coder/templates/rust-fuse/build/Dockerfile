@@ -52,7 +52,7 @@ RUN apt-get install -y --no-install-recommends \
     libstdc++-10-dev \
     cmake \
     libssl-dev
-RUN git clone https://github.com/rui314/mold.git --depth 1 --branch v1.10.1 /home/${USER}/mold && \
+RUN git clone https://github.com/rui314/mold.git --depth 1 --branch v1.11.0 /home/${USER}/mold && \
     mkdir /home/${USER}/mold/build && \
     cd /home/${USER}/mold/build && \
     cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/usr/bin/clang++ .. && \
