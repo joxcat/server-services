@@ -11,14 +11,25 @@ terraform {
   }
 }
 
+# https://coder.com/docs/v2/latest/templates/parameters#migration
 variable "git_repo" {
   description = "Default git repository"
   default = ""
   sensitive = false
 }
+data "coder_parameter" "git_repo" {
+  name        = "Git Repository"
+  type        = "string"
+  description = "Default git repository"
+  mutable     = true
+
+  legacy_variable_name = "git_repo"
+  legacy_variable = var.git_repo
+}
 
 locals {
   username = data.coder_workspace.me.owner
+  git_folder = var.git_repo != "" ? regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", var.git_repo).folder : ""
 }
 
 data "coder_provisioner" "me" {}
@@ -36,7 +47,10 @@ resource "coder_agent" "main" {
     sudo chown coder:coder ~/.local
     sudo chown coder:coder ~/.local/share
 
-    if [ ! -z "${var.git_repo}" ]; then env GIT_SSH_COMMAND="$GIT_SSH_COMMAND -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone ${var.git_repo}; fi
+    if [ ! -z "${var.git_repo}" ] && [ ! -d "${local.git_folder}" ]; then 
+      ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+      git clone ${var.git_repo} ${local.git_folder}
+    fi
 
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh
@@ -57,13 +71,40 @@ resource "coder_agent" "main" {
     GIT_AUTHOR_EMAIL    = "${data.coder_workspace.me.owner_email}"
     GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
   }
+  metadata {
+    display_name = "CPU Usage"
+    key = "cpu"
+    # calculates CPU usage by summing the "us", "sy" and "id" columns of
+    # vmstat.
+    script = <<EOT
+        top -bn1 | awk 'FNR==3 {printf "%2.0f%%", $2+$3+$4}'
+    EOT
+    interval = 1
+    timeout = 1
+  }
+  metadata {
+    display_name = "Memory Usage"
+    key = "mem"
+    script = <<EOT
+    cat /sys/fs/cgroup/memory.current | awk '{ printf("%.2fMB", $1/1024/1024) }'
+    EOT
+    interval = 1
+    timeout = 1
+  }
+  metadata {
+    display_name = "Process Count"
+    key = "proc"
+    script = "ps aux | wc -l"
+    interval = 1
+    timeout = 3
+  }
 }
 
 resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/coder${var.git_repo != "" ? "/${regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", var.git_repo).folder}" : ""}"
+  url          = "http://localhost:13337/?folder=/home/coder${local.git_folder}"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
@@ -102,6 +143,16 @@ resource "docker_volume" "home_volume" {
     value = data.coder_workspace.me.name
   }
 }
+resource "coder_metadata" "home_volume" {
+  count = data.coder_workspace.me.start_count
+  resource_id = docker_volume.home_volume.id
+  hide = true
+
+  item {
+    key = "id"
+    value = docker_volume.home_volume.name
+  }
+}
 
 
 resource "docker_image" "main" {
@@ -112,6 +163,11 @@ resource "docker_image" "main" {
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
   }
+}
+resource "coder_metadata" "hide_docker_image" {
+  count = data.coder_workspace.me.start_count
+  resource_id = docker_image.main.image_id
+  hide = true
 }
 
 resource "docker_container" "workspace" {
