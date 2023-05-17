@@ -16,6 +16,8 @@ resource "docker_network" "pterodactyl_wings" {
   driver = "bridge"
   ipam_config {
     subnet = "172.21.0.0/16"
+    gateway = "172.21.0.1"
+    aux_address = {}
   }
   options = {
     "com.docker.network.bridge.name" = "pterodactyl_nw"
