@@ -62,10 +62,10 @@ resource "coder_agent" "main" {
     fi
 
     # install and start code-server
-    curl -fsSL https://code-server.dev/install.sh | sh
-    code-server --install-extension usernamehw.errorlens
-    code-server --auth none --port 13337
-    
+    curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server
+    rm -f /tmp/code-server.log
+    /tmp/code-server/bin/code-server --install-extension usernamehw.errorlens >>/tmp/code-server.log 2>&1 &
+    /tmp/code-server/bin/code-server --auth none --port 13337 >>/tmp/code-server.log 2>&1 &
     EOF
 
   # These environment variables allow you to make Git commits right away after creating a
@@ -93,7 +93,7 @@ resource "coder_agent" "main" {
     display_name = "Memory Usage"
     key = "mem"
     script = <<EOT
-    cat /sys/fs/cgroup/memory.current | awk '{ printf("%.2fMB", $1/1024/1024) }'
+    cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { print (sum / 1024 / 1024) }'
     EOT
     interval = 1
     timeout = 1

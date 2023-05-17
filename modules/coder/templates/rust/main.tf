@@ -11,25 +11,26 @@ terraform {
   }
 }
 
-# https://coder.com/docs/v2/latest/templates/parameters#migration
-variable "git_repo" {
-  description = "Default git repository"
-  default = ""
-  sensitive = false
+provider "coder" {
+  feature_use_managed_variables = "true"
 }
+
 data "coder_parameter" "git_repo" {
   name        = "Git Repository"
   type        = "string"
   description = "Default git repository"
   mutable     = true
+  default     = ""
 
-  legacy_variable_name = "git_repo"
-  legacy_variable = var.git_repo
+  validation {
+    regex = "^(git@([a-zA-Z0-9-_.]+):(([a-zA-Z0-9-_.~]+)\\/)+[a-zA-Z0-9-_.]+|(https:\\/\\/[a-zA-Z0-9-_.]+\\/([a-zA-Z0-9-_.]+\\/)+)[a-zA-Z0-9-_.]+|)$"
+    error = "Unfortunately, it isn't a supported git url"
+  }
 }
 
 locals {
   username = data.coder_workspace.me.owner
-  git_folder = var.git_repo != "" ? regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", var.git_repo).folder : ""
+  git_folder = data.coder_parameter.git_repo.value != "" ? regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", data.coder_parameter.git_repo.value).folder : ""
 }
 
 data "coder_provisioner" "me" {}
@@ -47,18 +48,28 @@ resource "coder_agent" "main" {
     sudo chown coder:coder ~/.local
     sudo chown coder:coder ~/.local/share
 
-    if [ ! -z "${var.git_repo}" ] && [ ! -d "${local.git_folder}" ]; then 
+    # clone git if provided 
+    if [ ! -z "${data.coder_parameter.git_repo.value}" ] && [ ! -d "${local.git_folder}" ]; then 
       ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-      git clone ${var.git_repo} ${local.git_folder}
+      git clone ${data.coder_parameter.git_repo.value} ${local.git_folder}
     fi
 
     # install and start code-server
-    curl -fsSL https://code-server.dev/install.sh | sh
-    code-server --install-extension rust-lang.rust-analyzer
-    code-server --install-extension tamasfe.even-better-toml
-    code-server --install-extension usernamehw.errorlens
-    code-server --auth none --port 13337
-    
+    curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server
+    rm -f /tmp/code-server.log
+    /tmp/code-server/bin/code-server --install-extension rust-lang.rust-analyzer >>/tmp/code-server.log 2>&1 &
+    /tmp/code-server/bin/code-server --install-extension tamasfe.even-better-toml >>/tmp/code-server.log 2>&1 &
+    /tmp/code-server/bin/code-server --install-extension usernamehw.errorlens >>/tmp/code-server.log 2>&1 &
+    /tmp/code-server/bin/code-server --auth none --port 13337 >>/tmp/code-server.log 2>&1 &
+
+    # if found run .autosetup
+    if [ ! -z "${local.git_folder}" ] && [ -x "${local.git_folder}/.autosetup" ]; then
+      echo "running ${local.git_folder} .autosetup"
+      "./${local.git_folder}/.autosetup"
+    elif [ -x "~/.autosetup" ]; then
+      echo "running home .autosetup"
+      ~/.autosetup
+    fi
     EOF
 
   # These environment variables allow you to make Git commits right away after creating a
@@ -77,7 +88,7 @@ resource "coder_agent" "main" {
     # calculates CPU usage by summing the "us", "sy" and "id" columns of
     # vmstat.
     script = <<EOT
-        top -bn1 | awk 'FNR==3 {printf "%2.0f%%", $2+$3+$4}'
+    top -bn1 | awk 'FNR==3 {printf "%2.0f%%", $2+$3+$4}'
     EOT
     interval = 1
     timeout = 1
@@ -86,7 +97,7 @@ resource "coder_agent" "main" {
     display_name = "Memory Usage"
     key = "mem"
     script = <<EOT
-    cat /sys/fs/cgroup/memory.current | awk '{ printf("%.2fMB", $1/1024/1024) }'
+    cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { print (sum / 1024 / 1024) }'
     EOT
     interval = 1
     timeout = 1
@@ -97,6 +108,15 @@ resource "coder_agent" "main" {
     script = "ps aux | wc -l"
     interval = 1
     timeout = 3
+  }
+  metadata {
+    display_name = "Permanent Data Size"
+    key = "size"
+    script = <<EOT
+    du -h -d1 ~ | awk 'END { print $1 }'
+    EOT
+    interval = 60
+    timeout = 10
   }
 }
 
@@ -156,7 +176,7 @@ resource "coder_metadata" "home_volume" {
 
 
 resource "docker_image" "main" {
-  name = "coder-rust"
+  name = "coder-${data.coder_workspace.me.id}-rust"
   build {
     context = "./build"
   }
@@ -207,5 +227,4 @@ resource "docker_container" "workspace" {
     value = data.coder_workspace.me.name
   }
 }
-
 
