@@ -108,14 +108,6 @@ module "overleaf" {
   mongo_image = docker_image.mongo_4.image_id
 }
 
-/* module "code-server" {
-  source = "./modules/code-server"
-  network = docker_network.internal_proxy.id
-
-  git_name = var.code_server_git_name
-  git_email = var.code_server_git_email
-} */
-
 module "coder" {
   source = "./modules/coder"
   network = docker_network.internal_proxy.id
@@ -125,19 +117,6 @@ module "coder" {
   access_url = var.coder_access_url
   wildcard_url = var.coder_wildcard_url
   docker_group_id = "974"
-}
-
-module "ghost" {
-  source = "./modules/ghost"
-  network = docker_network.internal_proxy.id
-
-  mysql_image = docker_image.mysql_8.image_id
-  mysql_password = var.ghost_mysql_password
-  public_url = var.ghost_public_url
-  smtp_host = var.ghost_smtp_host
-  smtp_user = var.ghost_smtp_user
-  smtp_password = var.ghost_smtp_password
-  smtp_from = var.ghost_smtp_from
 }
 
 module "pterodactyl" {
@@ -157,5 +136,10 @@ module "pterodactyl" {
 
 module "ipfs" {
   source = "./modules/ipfs"
+  network = docker_network.internal_proxy.id
+}
+
+module "kroki" {
+  source = "./modules/kroki"
   network = docker_network.internal_proxy.id
 }

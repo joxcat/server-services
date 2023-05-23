@@ -60,16 +60,6 @@ variable "searx_host" {
   type = string
 }
 
-# Code-server
-variable "code_server_git_name" {
-  description = "Code Server Git name"
-  type = string
-}
-variable "code_server_git_email" {
-  description = "Code Server Git Email"
-  type = string
-}
-
 # Coder
 variable "coder_postgres_password" {
   description = "Coder's postgres password"
@@ -81,32 +71,6 @@ variable "coder_access_url" {
 }
 variable "coder_wildcard_url" {
   description = "Coder's wildcard matching url"
-  type = string
-}
-
-# Ghost
-variable "ghost_mysql_password" {
-  description = "Ghost MySQL database's password"
-  type = string
-}
-variable "ghost_public_url" {
-  description = "Ghost public facing url"
-  type = string
-}
-variable "ghost_smtp_host" {
-  description = "Ghost SMTP server host"
-  type = string
-}
-variable "ghost_smtp_user" {
-  description = "Ghost SMTP user"
-  type = string
-}
-variable "ghost_smtp_password" {
-  description = "Ghost SMTP password"
-  type = string
-}
-variable "ghost_smtp_from" {
-  description = "Ghost SMTP From value"
   type = string
 }
 
