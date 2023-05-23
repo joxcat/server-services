@@ -27,6 +27,18 @@ data "coder_parameter" "git_repo" {
     error = "Unfortunately, it isn't a supported git url"
   }
 }
+data "coder_parameter" "asdf_packages" {
+  name        = "ASDF packages"
+  type        = "string"
+  description = "ASDF packages to install in the form `package1@version,package2@version`"
+  mutable     = true
+  default     = ""
+
+  validation {
+    regex = "^(([a-z-]+@[0-9a-z+-.])(, ?[a-z-]+@[0-9a-z+-.])*|)$"
+    error = "The package format must be `package1@version,package2@version`"
+  }
+}
 
 locals {
   username = data.coder_workspace.me.owner
@@ -45,13 +57,11 @@ resource "coder_agent" "main" {
   startup_script = <<EOF
     #!/bin/sh
 
-    mkdir -p ~/.local/share
     sudo chown coder:coder ~/.local
     sudo chown coder:coder ~/.local/share
 
     # clone git if provided 
-    if [ ! -z "${data.coder_parameter.git_repo.value}" ] && [ ! -d "${local.git_folder}" ]; then
-      mkdir -p ~/.ssh
+    if [ ! -z "${data.coder_parameter.git_repo.value}" ] && [ ! -d "${local.git_folder}" ]; then 
       ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
       git clone ${data.coder_parameter.git_repo.value} ${local.git_folder}
     fi
@@ -59,8 +69,6 @@ resource "coder_agent" "main" {
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server
     rm -f /tmp/code-server.log
-    /tmp/code-server/bin/code-server --install-extension rust-lang.rust-analyzer >>/tmp/code-server.log 2>&1 &
-    /tmp/code-server/bin/code-server --install-extension tamasfe.even-better-toml >>/tmp/code-server.log 2>&1 &
     /tmp/code-server/bin/code-server --install-extension usernamehw.errorlens >>/tmp/code-server.log 2>&1 &
     /tmp/code-server/bin/code-server --auth none --port 13337 >>/tmp/code-server.log 2>&1 &
 
@@ -72,6 +80,13 @@ resource "coder_agent" "main" {
       echo "running home .autosetup"
       ~/.autosetup
     fi
+
+    # ASDF setup
+    echo "${data.coder_parameter.asdf_packages.value}" | sed 's/, /,/g' | tr '@' ' ' | tr ',' "\n" >> ~/.tool-versions
+    for $package in $(echo "${data.coder_parameter.asdf_packages.value}" | sed 's/, /,/g' | tr '@' ' ' | tr ',' "\n" | cut -f1 -d ' '); do
+      asdf plugin-add $package
+    done
+    asdf install
     EOF
 
   # These environment variables allow you to make Git commits right away after creating a
@@ -182,19 +197,9 @@ resource "docker_volume" "nix_volume" {
     ignore_changes = all
   }
 }
-resource "coder_metadata" "nix_volume" {
-  count = data.coder_workspace.me.start_count
-  resource_id = docker_volume.nix_volume.id
-  hide = true
-
-  item {
-    key = "id"
-    value = docker_volume.nix_volume.name
-  }
-}
 
 resource "docker_image" "main" {
-  name = "coder-${data.coder_workspace.me.id}-rust"
+  name = "coder-${data.coder_workspace.me.id}-asdf"
   build {
     context = "./build"
   }

@@ -15,14 +15,6 @@ provider "coder" {
   feature_use_managed_variables = "true"
 }
 
-data "coder_parameter" "node_version" {
-  name        = "Node Version"
-  type        = "number"
-  description = "Installed node version"
-  mutable     = true
-  default     = "16"
-}
-
 data "coder_parameter" "git_repo" {
   name        = "Git Repository"
   type        = "string"
@@ -56,6 +48,7 @@ resource "coder_agent" "main" {
     sudo chown coder:coder ~/.local
     sudo chown coder:coder ~/.local/share
 
+    # clone git if provided 
     if [ ! -z "${data.coder_parameter.git_repo.value}" ] && [ ! -d "${local.git_folder}" ]; then 
       ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
       git clone ${data.coder_parameter.git_repo.value} ${local.git_folder}
@@ -64,8 +57,19 @@ resource "coder_agent" "main" {
     # install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server
     rm -f /tmp/code-server.log
+    /tmp/code-server/bin/code-server --install-extension rust-lang.rust-analyzer >>/tmp/code-server.log 2>&1 &
+    /tmp/code-server/bin/code-server --install-extension tamasfe.even-better-toml >>/tmp/code-server.log 2>&1 &
     /tmp/code-server/bin/code-server --install-extension usernamehw.errorlens >>/tmp/code-server.log 2>&1 &
     /tmp/code-server/bin/code-server --auth none --port 13337 >>/tmp/code-server.log 2>&1 &
+
+    # if found run .autosetup
+    if [ ! -z "${local.git_folder}" ] && [ -x "${local.git_folder}/.autosetup" ]; then
+      echo "running ${local.git_folder} .autosetup"
+      "./${local.git_folder}/.autosetup"
+    elif [ -x "~/.autosetup" ]; then
+      echo "running home .autosetup"
+      ~/.autosetup
+    fi
     EOF
 
   # These environment variables allow you to make Git commits right away after creating a
@@ -84,7 +88,7 @@ resource "coder_agent" "main" {
     # calculates CPU usage by summing the "us", "sy" and "id" columns of
     # vmstat.
     script = <<EOT
-        top -bn1 | awk 'FNR==3 {printf "%2.0f%%", $2+$3+$4}'
+    top -bn1 | awk 'FNR==3 {printf "%2.0f%%", $2+$3+$4}'
     EOT
     interval = 1
     timeout = 1
@@ -93,7 +97,7 @@ resource "coder_agent" "main" {
     display_name = "Memory Usage"
     key = "mem"
     script = <<EOT
-    cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { print (sum / 1024 / 1024) }'
+    cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf "%.2fMB", sum/1024/1024 }'
     EOT
     interval = 1
     timeout = 1
@@ -105,13 +109,22 @@ resource "coder_agent" "main" {
     interval = 1
     timeout = 3
   }
+  metadata {
+    display_name = "Permanent Data Size"
+    key = "size"
+    script = <<EOT
+    du -h -d1 ~ | awk 'END { print $1 }'
+    EOT
+    interval = 60
+    timeout = 10
+  }
 }
 
 resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/coder${local.git_folder}"
+  url          = "http://localhost:13337/?folder=/home/coder/${local.git_folder}"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
@@ -161,18 +174,20 @@ resource "coder_metadata" "home_volume" {
   }
 }
 
+
 resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.me.id}-node"
   build {
     context = "./build"
-
-    build_arg = {
-      NODE_VERSION: data.coder_parameter.node_version.value
-    }
   }
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
   }
+}
+resource "coder_metadata" "hide_docker_image" {
+  count = data.coder_workspace.me.start_count
+  resource_id = docker_image.main.image_id
+  hide = true
 }
 
 resource "docker_container" "workspace" {

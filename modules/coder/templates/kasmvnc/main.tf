@@ -15,23 +15,20 @@ provider "coder" {
   feature_use_managed_variables = "true"
 }
 
-data "coder_parameter" "git_repo" {
-  name        = "Git Repository"
+data "coder_parameter" "install_script" {
+  name        = "Install Script"
   type        = "string"
-  description = "Default git repository"
+  description = "Command to run to install the application"
   mutable     = true
-  default     = ""
-
-  validation {
-    regex = "^(git@([a-zA-Z0-9-_.]+):(([a-zA-Z0-9-_.~]+)\\/)+[a-zA-Z0-9-_.]+|(https:\\/\\/[a-zA-Z0-9-_.]+\\/([a-zA-Z0-9-_.]+\\/)+)[a-zA-Z0-9-_.]+|)$"
-    error = "Unfortunately, it isn't a supported git url"
-  }
+}
+data "coder_parameter" "app_to_run" {
+  name        = "Application to run"
+  type        = "string"
+  description = "Application that will be runned in KasmVNC"
+  mutable     = true
 }
 
-locals {
-  username = data.coder_workspace.me.owner
-  git_folder = data.coder_parameter.git_repo.value != "" ? regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", data.coder_parameter.git_repo.value).folder : ""
-}
+locals {}
 
 data "coder_provisioner" "me" {}
 
@@ -44,31 +41,7 @@ resource "coder_agent" "main" {
   os             = "linux"
   startup_script = <<EOF
     #!/bin/sh
-
-    mkdir -p ~/.local/share
-    sudo chown coder:coder ~/.local
-    sudo chown coder:coder ~/.local/share
-
-    # clone git if provided 
-    if [ ! -z "${data.coder_parameter.git_repo.value}" ] && [ ! -d "${local.git_folder}" ]; then
-      mkdir -p ~/.ssh
-      ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-      git clone ${data.coder_parameter.git_repo.value} ${local.git_folder}
-    fi
-
-    # install and start code-server
-    curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server
-    rm -f /tmp/code-server.log
-    /tmp/code-server/bin/code-server --install-extension rust-lang.rust-analyzer >>/tmp/code-server.log 2>&1 &
-    /tmp/code-server/bin/code-server --install-extension tamasfe.even-better-toml >>/tmp/code-server.log 2>&1 &
-    /tmp/code-server/bin/code-server --install-extension usernamehw.errorlens >>/tmp/code-server.log 2>&1 &
-    /tmp/code-server/bin/code-server --auth none --port 13337 >>/tmp/code-server.log 2>&1 &
-
-    # if found run .autosetup
-    if [ ! -z "${local.git_folder}" ] && [ -x "${local.git_folder}/.autosetup" ]; then
-      echo "running ${local.git_folder} .autosetup"
-      "./${local.git_folder}/.autosetup"
-    elif [ -x "~/.autosetup" ]; then
+    if [ -x "~/.autosetup" ]; then
       echo "running home .autosetup"
       ~/.autosetup
     fi
@@ -99,7 +72,7 @@ resource "coder_agent" "main" {
     display_name = "Memory Usage"
     key = "mem"
     script = <<EOT
-    cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf "%.2fMB", sum/1024/1024 }'
+  cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf "%.2fMB", (sum / 1024 / 1024) }'
     EOT
     interval = 1
     timeout = 1
@@ -122,20 +95,13 @@ resource "coder_agent" "main" {
   }
 }
 
-resource "coder_app" "code-server" {
+resource "coder_app" "kasm" {
   agent_id     = coder_agent.main.id
-  slug         = "code-server"
-  display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/coder/${local.git_folder}"
-  icon         = "/icon/code.svg"
-  subdomain    = false
+  slug         = "kasm"
+  display_name = "KasmVNC"
+  url          = "http://localhost:3000/"
+  subdomain    = true
   share        = "owner"
-
-  healthcheck {
-    url       = "http://localhost:13337/healthz"
-    interval  = 5
-    threshold = 6
-  }
 }
 
 resource "docker_volume" "home_volume" {
@@ -175,28 +141,16 @@ resource "coder_metadata" "home_volume" {
   }
 }
 
-resource "docker_volume" "nix_volume" {
-  name = "coder-nix"
-  # Protect the volume from being deleted due to changes in attributes.
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "coder_metadata" "nix_volume" {
-  count = data.coder_workspace.me.start_count
-  resource_id = docker_volume.nix_volume.id
-  hide = true
-
-  item {
-    key = "id"
-    value = docker_volume.nix_volume.name
-  }
-}
 
 resource "docker_image" "main" {
-  name = "coder-${data.coder_workspace.me.id}-rust"
+  name = "coder-${data.coder_workspace.me.id}-kasm"
   build {
     context = "./build"
+    build_args = {
+      INSTALL_SCRIPT = "${data.coder_parameter.install_script.value}"
+      APP_TO_RUN = "${data.coder_parameter.app_to_run.value}"
+      CODER_INIT_SCRIPT = replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")
+    }
   }
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
@@ -216,22 +170,26 @@ resource "docker_container" "workspace" {
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
   hostname = data.coder_workspace.me.name
   # Use the docker gateway if the access URL is 127.0.0.1
-  entrypoint = ["sh", "-c", replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")]
-  env        = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
+  entrypoint = ["/init"]
+  env = [
+    "CODER_AGENT_TOKEN=${coder_agent.main.token}",
+    "CUSTOM_USER=",
+    "PASSWORD=",
+    "TITLE=${data.coder_workspace.me.name}",
+    "PUID=0",
+    "PGID=0"
+  ]
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/coder/"
+    container_path = "/config"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
-  volumes {
-    container_path = "/nix"
-    volume_name    = docker_volume.nix_volume.name
-    read_only      = false
-  }
+  security_opts = ["seccomp=unconfined"]
+
   # Add labels in Docker to keep track of orphan resources.
   labels {
     label = "coder.owner"

@@ -1,12 +1,13 @@
-FROM ubuntu:20.04
+FROM ubuntu
 
 RUN apt-get update && \
     DEBIAN_FRONTEND="noninteractive" apt-get install --yes \
     bash \
     bash-completion \
     build-essential \
-    ca-certificates \
     curl \
+    wget \
+    ca-certificates \
     htop \
     locales \
     man \
@@ -14,10 +15,6 @@ RUN apt-get update && \
     python3-pip \
     software-properties-common \
     sudo \
-    systemd \
-    systemd-sysv \
-    unzip \
-    wget \
     fontconfig && \
     # Install latest Git using their official PPA
     add-apt-repository ppa:git-core/ppa && \
@@ -27,11 +24,13 @@ RUN apt-get update && \
 ARG USER=coder
 
 RUN useradd ${USER} \
+    --groups sudo \
     --create-home \
     --shell=/bin/bash \
     --uid=1000 \
-    --user-group && \
-    echo "coder ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers.d/nopasswd
+    --user-group \
+    && echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
+    && chmod 0440 /etc/sudoers.d/${USER}
 
 USER ${USER}
 WORKDIR /home/${USER}
@@ -73,4 +72,3 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH=$PATH:$HOME/.cargo/bin
 # Rust-analyser
 RUN rustup component add clippy rustfmt rust-analyzer
-
