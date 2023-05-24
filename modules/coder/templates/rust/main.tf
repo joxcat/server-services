@@ -232,6 +232,13 @@ resource "docker_container" "workspace" {
     volume_name    = docker_volume.nix_volume.name
     read_only      = false
   }
+
+  // So we can GDB in Docker
+  capabilities {
+    add = ["SYS_PTRACE"]
+  }
+  security_opts = ["seccomp=unconfined"]
+
   # Add labels in Docker to keep track of orphan resources.
   labels {
     label = "coder.owner"
