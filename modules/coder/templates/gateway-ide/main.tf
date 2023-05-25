@@ -76,7 +76,7 @@ data "coder_parameter" "memory" {
   type        = "number"
   description = "What Docker memory do you want?"
   mutable     = true
-  default     = 1024
+  default     = 4096
   icon        = "https://www.vhv.rs/dpng/d/33-338595_random-access-memory-logo-hd-png-download.png"
 
   validation {
@@ -162,9 +162,23 @@ fi
 # script to symlink JetBrains Gateway IDE directory to image-installed IDE directory
 # More info: https://www.jetbrains.com/help/idea/remote-development-troubleshooting.html#setup
 cd /opt/${lookup(local.ide-dir, data.coder_parameter.ide.value)}/bin
-./remote-dev-server.sh registerBackendLocationForGateway
+./remote-dev-server.sh registerBackendLocationForGateway || true
 
   EOT  
+}
+
+resource "coder_app" "public-port" {
+  agent_id  = coder_agent.dev.id
+  slug      = "public-port"
+  url       = "http://localhost:8080"
+  subdomain = true
+  share     = "public"
+
+  healthcheck {
+    url       = "http://localhost:8080"
+    interval  = 10
+    threshold = 30
+  }
 }
 
 resource "docker_container" "workspace" {
