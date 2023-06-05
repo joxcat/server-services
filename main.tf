@@ -20,6 +20,9 @@ resource "docker_image" "mysql_8" {
 resource "docker_image" "postgres_14" {
   name = "postgres:14"
 }
+resource "docker_image" "postgres_15" {
+  name = "postgres:15-alpine"
+}
 resource "docker_image" "redis" {
   name = "redis:alpine"
 }
@@ -58,15 +61,6 @@ module "rss-bridge" {
   source = "./modules/rss-bridge"
   network = docker_network.internal_proxy.id
 }
-
-/* module "shareftp" {
-  source = "./modules/shareftp"
-  network = docker_network.internal_proxy.id
-
-  host = var.shareftp_host
-  username = var.shareftp_username
-  password = var.shareftp_password
-} */
 
 module "filestash" {
   source = "./modules/filestash"
@@ -142,4 +136,13 @@ module "ipfs" {
 module "kroki" {
   source = "./modules/kroki"
   network = docker_network.internal_proxy.id
+}
+
+module "umami" {
+  source = "./modules/umami"
+  network = docker_network.internal_proxy.id
+
+  postgres_image = docker_image.postgres_15.image_id
+  postgres_password = var.umami_postgres_password
+  app_secret = var.umami_app_secret
 }

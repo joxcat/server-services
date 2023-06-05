@@ -103,3 +103,13 @@ variable "pterodactyl_smtp_username" {
   description = "Pterodactyl SMTP Username"
   type = string
 }
+
+# Umami
+variable "umami_postgres_password" {
+  description = "Umami Postgres database password"
+  type = string
+}
+variable "umami_app_secret" {
+  description = "Umami internal app secret"
+  type = string
+}

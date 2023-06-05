@@ -18,6 +18,11 @@ RUN apt-get update && \
     systemd-sysv \
     unzip \
     fontconfig \
+    libbz2-dev \
+    libncurses-dev \
+    libffi-dev \
+    libreadline-dev \
+    libssl-dev \
     wget && \
     # Install latest Git using their official PPA
     add-apt-repository ppa:git-core/ppa && \
@@ -51,7 +56,12 @@ RUN cd $HOME/.fonts && \
     rm iosevka.tar.gz && \
     fc-cache -f
 
+# Add ASDF
 RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.11.3
+ENV PATH="$HOME/.asdf/bin:$PATH"
 RUN echo '. "$HOME/.asdf/asdf.sh"' >> "$HOME/.bashrc" \
     && echo '. "$HOME/.asdf/completions/asdf.bash"' >> "$HOME/.bashrc"
 
+# Add nix
+RUN sh <(curl -L https://nixos.org/nix/install) --no-daemon --yes
+RUN echo '. "$HOME/.nix-profile/etc/profile.d/nix.sh"' >> "$HOME/.bashrc"

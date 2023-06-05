@@ -35,14 +35,14 @@ data "coder_parameter" "asdf_packages" {
   default     = ""
 
   validation {
-    regex = "^(([a-z-]+@[0-9a-z+-.])(, ?[a-z-]+@[0-9a-z+-.])*|)$"
+    regex = "^(([a-z-]+@[0-9a-z+-.]+)(,[a-z-]+@[0-9a-z+-.])*|)$"
     error = "The package format must be `package1@version,package2@version`"
   }
 }
 
 locals {
   username = data.coder_workspace.me.owner
-  git_folder = data.coder_parameter.git_repo.value != "" ? regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", data.coder_parameter.git_repo.value).folder : ""
+  git_folder = data.coder_parameter.git_repo.value != "" ? regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_.]+)(?P<git>.git)?$", data.coder_parameter.git_repo.value).folder : ""
 }
 
 data "coder_provisioner" "me" {}
@@ -83,7 +83,7 @@ resource "coder_agent" "main" {
 
     # ASDF setup
     echo "${data.coder_parameter.asdf_packages.value}" | sed 's/, /,/g' | tr '@' ' ' | tr ',' "\n" >> ~/.tool-versions
-    for $package in $(echo "${data.coder_parameter.asdf_packages.value}" | sed 's/, /,/g' | tr '@' ' ' | tr ',' "\n" | cut -f1 -d ' '); do
+    for package in $(echo "${data.coder_parameter.asdf_packages.value}" | sed 's/, /,/g' | tr '@' ' ' | tr ',' "\n" | cut -f1 -d ' '); do
       asdf plugin-add $package
     done
     asdf install
@@ -190,14 +190,6 @@ resource "coder_metadata" "home_volume" {
   }
 }
 
-resource "docker_volume" "nix_volume" {
-  name = "coder-nix"
-  # Protect the volume from being deleted due to changes in attributes.
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.me.id}-asdf"
   build {
@@ -234,7 +226,7 @@ resource "docker_container" "workspace" {
   }
   volumes {
     container_path = "/nix"
-    volume_name    = docker_volume.nix_volume.name
+    volume_name    = "coder-nix" 
     read_only      = false
   }
   # Add labels in Docker to keep track of orphan resources.
