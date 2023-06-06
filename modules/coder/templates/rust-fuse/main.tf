@@ -11,14 +11,26 @@ terraform {
   }
 }
 
-variable "git_repo" {
+provider "coder" {
+  feature_use_managed_variables = "true"
+}
+
+data "coder_parameter" "git_repo" {
+  name        = "Git Repository"
+  type        = "string"
   description = "Default git repository"
-  default = ""
-  sensitive = false
+  mutable     = true
+  default     = ""
+
+  validation {
+    regex = "^(git@([a-zA-Z0-9-_.]+):(([a-zA-Z0-9-_.~]+)\\/)+[a-zA-Z0-9-_.]+|(https:\\/\\/[a-zA-Z0-9-_.]+\\/([a-zA-Z0-9-_.]+\\/)+)[a-zA-Z0-9-_.]+|)$"
+    error = "Unfortunately, it isn't a supported git url"
+  }
 }
 
 locals {
   username = data.coder_workspace.me.owner
+  git_folder = data.coder_parameter.git_repo.value != "" ? regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", data.coder_parameter.git_repo.value).folder : ""
 }
 
 data "coder_provisioner" "me" {}
@@ -33,19 +45,33 @@ resource "coder_agent" "main" {
   startup_script = <<EOF
     #!/bin/sh
 
+    mkdir -p ~/.local/share
     sudo chown coder:coder ~/.local
     sudo chown coder:coder ~/.local/share
 
-    if [ ! -z "${var.git_repo}" ]; then env GIT_SSH_COMMAND="$GIT_SSH_COMMAND -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git clone ${var.git_repo}; fi
+    if [ ! -z "${data.coder_parameter.git_repo.value}" ] && [ ! -d "${local.git_folder}" ]; then
+      mkdir -p ~/.ssh
+      ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+      git clone ${data.coder_parameter.git_repo.value} ${local.git_folder}
+    fi
 
     # install and start code-server
     # export EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl":"https://vscode.blob.core.windows.net/gallery/index","itemUrl":"https://marketplace.visualstudio.com/items"}'
-    curl -fsSL https://code-server.dev/install.sh | sh -s -- --version 4.9.1
-    code-server --install-extension rust-lang.rust-analyzer
-    code-server --install-extension tamasfe.even-better-toml
-    code-server --install-extension usernamehw.errorlens
-    code-server --auth none --port 13337
+    curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server
+    rm -f /tmp/code-server.log
+    /tmp/code-server/bin/code-server --install-extension rust-lang.rust-analyzer >>/tmp/code-server.log 2>&1 &
+    /tmp/code-server/bin/code-server --install-extension tamasfe.even-better-toml >>/tmp/code-server.log 2>&1 &
+    /tmp/code-server/bin/code-server --install-extension usernamehw.errorlens >>/tmp/code-server.log 2>&1 &
+    /tmp/code-server/bin/code-server --auth none --port 13337 >>/tmp/code-server.log 2>&1 &
     
+    # if found run .autosetup
+    if [ ! -z "${local.git_folder}" ] && [ -x "${local.git_folder}/.autosetup" ]; then
+      echo "running ${local.git_folder} .autosetup"
+      "./${local.git_folder}/.autosetup"
+    elif [ -x "~/.autosetup" ]; then
+      echo "running home .autosetup"
+      ~/.autosetup
+    fi
     EOF
 
   # These environment variables allow you to make Git commits right away after creating a
@@ -58,13 +84,49 @@ resource "coder_agent" "main" {
     GIT_AUTHOR_EMAIL    = "${data.coder_workspace.me.owner_email}"
     GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
   }
+  metadata {
+    display_name = "CPU Usage"
+    key = "cpu"
+    # calculates CPU usage by summing the "us", "sy" and "id" columns of
+    # vmstat.
+    script = <<EOT
+    top -bn1 | awk 'FNR==3 {printf "%2.0f%%", $2+$3+$4}'
+    EOT
+    interval = 1
+    timeout = 1
+  }
+  metadata {
+    display_name = "Memory Usage"
+    key = "mem"
+    script = <<EOT
+    cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf "%.2fMB", sum/1024/1024 }'
+    EOT
+    interval = 1
+    timeout = 1
+  }
+  metadata {
+    display_name = "Process Count"
+    key = "proc"
+    script = "ps aux | wc -l"
+    interval = 1
+    timeout = 3
+  }
+  metadata {
+    display_name = "Permanent Data Size"
+    key = "size"
+    script = <<EOT
+    du -h -d1 ~ | awk 'END { print $1 }'
+    EOT
+    interval = 60
+    timeout = 10
+  }
 }
 
 resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/coder${var.git_repo != "" ? "/${regex("[a-zA-Z0-9-_]+/(?P<folder>[a-zA-Z0-9-_]+)(?P<git>.git)?$", var.git_repo).folder}" : ""}"
+  url          = "http://localhost:13337/?folder=/home/coder/${local.git_folder}"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
@@ -103,7 +165,16 @@ resource "docker_volume" "home_volume" {
     value = data.coder_workspace.me.name
   }
 }
+resource "coder_metadata" "home_volume" {
+  count = data.coder_workspace.me.start_count
+  resource_id = docker_volume.home_volume.id
+  hide = true
 
+  item {
+    key = "id"
+    value = docker_volume.home_volume.name
+  }
+}
 
 resource "docker_image" "main" {
   name = "coder-rust-fuse"
@@ -113,6 +184,11 @@ resource "docker_image" "main" {
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
   }
+}
+resource "coder_metadata" "hide_docker_image" {
+  count = data.coder_workspace.me.start_count
+  resource_id = docker_image.main.image_id
+  hide = true
 }
 
 resource "docker_container" "workspace" {
@@ -134,6 +210,12 @@ resource "docker_container" "workspace" {
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
+  volumes {
+    container_path = "/nix"
+    volume_name    = "coder-nix" 
+    read_only      = false
+  }
+
   # Add labels in Docker to keep track of orphan resources.
   labels {
     label = "coder.owner"
@@ -161,6 +243,6 @@ resource "docker_container" "workspace" {
   capabilities {
     add = ["SYS_ADMIN"]
   }
-  security_opts = ["apparmor:unconfined"]
+  # security_opts = ["apparmor:unconfined"]
 }
 
