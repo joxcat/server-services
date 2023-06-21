@@ -4,14 +4,13 @@ GoogleSearch
 Instagram
 Twitter
 Youtube
-CVE
-dev.to
+CVEDetails
+DevTo
 Dribbble
 EpicGames
-FeedMerger
+FeedMerge
 Filter
 LeBonCoin
-JournalOfficiel
 Mastodon
 NyaaTorrents
 Reddit
