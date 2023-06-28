@@ -65,6 +65,10 @@ resource "docker_container" "filestash" {
     host_path = "/var/local/docker/shareftp/data/data"
     container_path = "/other_data/share"
   }
+  volumes {
+    host_path = "/var/local/docker/komga/data"
+    container_path = "/other_data/komga"
+  }
 
   depends_on = [
     docker_network.filestash,

@@ -146,3 +146,8 @@ module "umami" {
   postgres_password = var.umami_postgres_password
   app_secret = var.umami_app_secret
 }
+
+module "komga" {
+  source = "./modules/komga"
+  network = docker_network.internal_proxy.id
+}
