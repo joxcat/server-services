@@ -151,3 +151,20 @@ module "komga" {
   source = "./modules/komga"
   network = docker_network.internal_proxy.id
 }
+
+/*module "supabase" {
+  source = "./modules/supabase"
+  network = docker_network.internal_proxy.id
+
+  disable_signup = "false"
+
+  postgres_password = var.supabase_postgres_password
+  smtp_host = var.supabase_smtp_host
+  smtp_port = var.supabase_smtp_port
+  smtp_user = var.supabase_smtp_user
+  smtp_password = var.supabase_smtp_password
+  smtp_sender = var.supabase_smtp_sender
+  smtp_admin_email = var.supabase_smtp_admin_email
+  studio_public_url = var.supabase_studio_public_url
+  jwt_secret = var.supabase_jwt_secret
+}*/

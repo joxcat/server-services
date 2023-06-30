@@ -113,3 +113,42 @@ variable "umami_app_secret" {
   description = "Umami internal app secret"
   type = string
 }
+
+# Supabase
+variable "supabase_postgres_password" {
+  description = "Supabase Postgres password"
+  type = string
+}
+variable "supabase_smtp_host" {
+  description = "Supabase smtp host"
+  type = string
+}
+variable "supabase_smtp_port" {
+  description = "Supabase smtp port"
+  type = string
+}
+variable "supabase_smtp_user" {
+  description = "Supabase SMTP user"
+  type = string
+}
+variable "supabase_smtp_password" {
+  description = "Supabase SMTP password"
+  type = string
+}
+variable "supabase_smtp_sender" {
+  description = "Supabase sender identity"
+  type = string
+}
+variable "supabase_smtp_admin_email" {
+  description = "Supabase Admin's email"
+  type = string
+}
+variable "supabase_studio_public_url" {
+  description = "Supabase public URL"
+  type = string
+}
+variable "supabase_jwt_secret" {
+  description = "Supabase JWT Secret"
+  type = string
+}
+
