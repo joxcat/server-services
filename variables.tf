@@ -143,8 +143,8 @@ variable "supabase_smtp_admin_email" {
   description = "Supabase Admin's email"
   type = string
 }
-variable "supabase_studio_public_url" {
-  description = "Supabase public URL"
+variable "supabase_site_url" {
+  description = "Supabase front URL"
   type = string
 }
 variable "supabase_jwt_secret" {

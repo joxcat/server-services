@@ -8,41 +8,41 @@ terraform {
 }
 
 # Ported from docker-compose.yml
-# on 2023-04-28 https://github.com/supabase/supabase/blob/6ff285ff6f608728e3e06c9f1ff288182b632bf5/docker/docker-compose.yml
+# on 2023-07-02 from https://github.com/supabase/supabase/blob/185034b4ffe3bf43fa137ec9870ebc166a4c2f1d/docker/docker-compose.yml 
 
 resource "docker_network" "supabase" {
   name = "internal_supabase"
 }
 
 resource "docker_image" "supabase_studio" {
-  name = "supabase/studio:20230330-99fed3d"
+  name = "supabase/studio:20230621-7a24ddd"
 }
 resource "docker_image" "supabase_kong" {
   name = "kong:2.8.1"
 }
 resource "docker_image" "supabase_gotrue" {
-  name = "supabase/gotrue:v2.60.7"
+  name = "supabase/gotrue:v2.62.1"
 }
 resource "docker_image" "supabase_postgrest" {
   name = "postgrest/postgrest:v10.1.2"
 }
 resource "docker_image" "supabase_realtime" {
-  name = "supabase/realtime:v2.5.1"
+  name = "supabase/realtime:v2.10.1"
 }
 resource "docker_image" "supabase_storage" {
-  name = "supabase/storage-api:v0.28.2"
+  name = "supabase/storage-api:v0.40.4"
 }
 resource "docker_image" "supabase_imgproxy" {
-  name = "darthsim/imgproxy:v3.13"
+  name = "darthsim/imgproxy:v3.8.0"
 }
 resource "docker_image" "supabase_meta" {
-  name = "supabase/postgres-meta:v0.60.7"
+  name = "supabase/postgres-meta:v0.66.3"
 }
 resource "docker_image" "supabase_fn" {
-  name = "supabase/edge-runtime:v1.2.12"
+  name = "supabase/edge-runtime:v1.5.2"
 }
 resource "docker_image" "supabase_db" {
-  name = "supabase/postgres:15.1.0.54-rc0"
+  name = "supabase/postgres:15.1.0.90"
 }
 
 resource "docker_container" "supabase_studio" {
@@ -114,6 +114,7 @@ resource "docker_container" "supabase_kong" {
   networks_advanced {
     name = docker_network.supabase.id
   }
+  # Inner port 8000
   networks_advanced {
     name = var.network
   }
@@ -167,7 +168,8 @@ resource "docker_container" "supabase_auth" {
     "GOTRUE_SMTP_PASS=${var.smtp_password}",
     "GOTRUE_SMTP_SENDER_NAME=${var.smtp_sender}",
     "GOTRUE_EXTERNAL_PHONE_ENABLED=${var.enable_phone_signup}",
-    "GOTRUE_SMS_AUTOCONFIRM=${var.enable_phone_autoconfirm}"
+    "GOTRUE_SMS_AUTOCONFIRM=${var.enable_phone_autoconfirm}",
+    "MFA_ENABLED=false"
   ]
   
   networks_advanced {
@@ -229,7 +231,7 @@ resource docker_container "supabase_realtime" {
     "DB_USER=supabase_admin",
     "DB_PASSWORD=${var.postgres_password}",
     "DB_NAME=postgres",
-    "DB_AFTER_CONNECT_QUERY='SET search_path TO _realtime'",
+    "DB_AFTER_CONNECT_QUERY=SET search_path TO _realtime",
     "DB_ENC_KEY=supabaserealtime",
     "API_JWT_SECRET=${var.jwt_secret}",
     "FLY_ALLOC_ID=fly123",
@@ -388,7 +390,7 @@ resource docker_container "supabase_functions" {
 
   volumes {
     host_path = abspath("./modules/supabase/functions")
-    container_path = "/home/deno/functions/main"
+    container_path = "/home/deno/functions"
   }
 
   networks_advanced {
