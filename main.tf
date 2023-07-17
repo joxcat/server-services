@@ -94,14 +94,6 @@ module "searx" {
   host = var.searx_host
 }
 
-module "overleaf" {
-  source = "./modules/overleaf"
-  network = docker_network.internal_proxy.id
-
-  redis_image = docker_image.redis_5.image_id
-  mongo_image = docker_image.mongo_4.image_id
-}
-
 module "coder" {
   source = "./modules/coder"
   network = docker_network.internal_proxy.id
@@ -152,7 +144,7 @@ module "komga" {
   network = docker_network.internal_proxy.id
 }
 
-module "supabase" {
+/*module "supabase" {
   source = "./modules/supabase"
   network = docker_network.internal_proxy.id
 
@@ -169,4 +161,4 @@ module "supabase" {
   smtp_admin_email = var.supabase_smtp_admin_email
   studio_public_url = "${var.supabase_site_url}/proxy"
   jwt_secret = var.supabase_jwt_secret
-}
+}*/

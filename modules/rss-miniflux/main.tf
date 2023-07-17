@@ -12,7 +12,7 @@ resource "docker_network" "miniflux" {
 }
 
 resource "docker_image" "miniflux" {
-  name = "miniflux/miniflux:2.0.36"
+  name = "miniflux/miniflux:2.0.45"
 }
 
 resource "docker_container" "miniflux_database" {
@@ -61,7 +61,8 @@ resource "docker_container" "miniflux" {
   }
 
   env = [
-    "DATABASE_URL=postgres://miniflux:${var.database_password}@miniflux_database/miniflux?sslmode=disable"
+    "DATABASE_URL=postgres://miniflux:${var.database_password}@miniflux_database/miniflux?sslmode=disable",
+    "RUN_MIGRATIONS=1"
   ]
 
   depends_on = [
