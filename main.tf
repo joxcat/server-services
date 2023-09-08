@@ -119,12 +119,12 @@ module "pterodactyl" {
   smtp_username = var.pterodactyl_smtp_username
   smtp_password = var.pterodactyl_smtp_password
 }
-
+/*
 module "ipfs" {
   source = "./modules/ipfs"
   network = docker_network.internal_proxy.id
 }
-
+*/
 module "kroki" {
   source = "./modules/kroki"
   network = docker_network.internal_proxy.id
@@ -144,6 +144,11 @@ module "komga" {
   network = docker_network.internal_proxy.id
 }
 
+/*module "grocy" {
+  source = "./modules/grocy"
+  network = docker_network.internal_proxy.id
+}*/
+
 /*module "supabase" {
   source = "./modules/supabase"
   network = docker_network.internal_proxy.id
@@ -162,3 +167,8 @@ module "komga" {
   studio_public_url = "${var.supabase_site_url}/proxy"
   jwt_secret = var.supabase_jwt_secret
 }*/
+
+module "seedbox" {
+  source = "./modules/seedbox"
+  network = docker_network.internal_proxy.id
+}

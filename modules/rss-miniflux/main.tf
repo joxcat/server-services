@@ -12,7 +12,7 @@ resource "docker_network" "miniflux" {
 }
 
 resource "docker_image" "miniflux" {
-  name = "miniflux/miniflux:2.0.45"
+  name = "miniflux/miniflux:2.0.47"
 }
 
 resource "docker_container" "miniflux_database" {

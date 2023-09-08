@@ -17,6 +17,8 @@ resource "docker_container" "ipfs" {
   image = docker_image.ipfs.image_id
   restart = "unless-stopped"
 
+  env = [ "IPFS_PROFILE=server" ]
+
   networks_advanced {
     name = var.network
   }
