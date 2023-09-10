@@ -19,6 +19,30 @@ resource docker_image "rtorrent" {
   name = "jesec/rtorrent:latest"
 }
 
+resource docker_image "jfa_go" {
+  name = "hrfee/jfa-go"
+}
+
+resource docker_image "radarr" {
+  name = "lscr.io/linuxserver/radarr:latest"
+}
+
+resource docker_image "sonarr" {
+  name = "lscr.io/linuxserver/sonarr:latest"
+}
+
+/*resource docker_image "nzbget" {
+  name = "lscr.io/linuxserver/nzbget:latest"
+}*/
+
+/*resource docker_image "reiverr" {
+  name = "ghcr.io/aleksilassila/reiverr:latest"
+}*/
+
+resource docker_image "prowlarr" {
+  name = "lscr.io/linuxserver/prowlarr:latest"
+}
+
 resource docker_container "flood" {
   name = "seedbox_flood"
   hostname = "seedbox_flood"
@@ -45,6 +69,106 @@ resource docker_container "flood" {
   depends_on = [ docker_image.flood ]
 }
 
+resource docker_container "radarr" {
+  name = "seedbox_radarr"
+  hostname = "seedbox_radarr"
+  image = docker_image.radarr.image_id
+  restart = "unless-stopped"
+
+  env = [ "PUID=1000", "PGID=1001", "TZ=Europe/Paris" ]
+
+  networks_advanced {
+    name = var.network
+  }
+
+  volumes {
+    host_path = "/var/local/docker/seedbox/radarr_config"
+    container_path = "/config"
+  }
+  volumes {
+    host_path = "/var/local/docker/seedbox/config/.local/share/rtorrent"
+    container_path = "/config/.local/share/rtorrent"
+  }
+  volumes {
+    host_path = "/var/local/docker/seedbox/data"
+    container_path = "/data"
+  }
+
+  depends_on = [ docker_image.radarr ]
+}
+
+resource docker_container "sonarr" {
+  name = "seedbox_sonarr"
+  hostname = "seedbox_sonarr"
+  image = docker_image.sonarr.image_id
+  restart = "unless-stopped"
+
+  env = [ "PUID=1000", "PGID=1001", "TZ=Europe/Paris" ]
+
+  networks_advanced {
+    name = var.network
+  }
+
+  volumes {
+    host_path = "/var/local/docker/seedbox/sonarr_config"
+    container_path = "/config"
+  }
+  volumes {
+    host_path = "/var/local/docker/seedbox/config/.local/share/rtorrent"
+    container_path = "/config/.local/share/rtorrent"
+  }
+  volumes {
+    host_path = "/var/local/docker/seedbox/data"
+    container_path = "/data"
+  }
+
+  depends_on = [ docker_image.sonarr ]
+}
+
+resource docker_container "prowlarr" {
+  name = "seedbox_prowlarr"
+  hostname = "seedbox_prowlarr"
+  image = docker_image.prowlarr.image_id
+  restart = "unless-stopped"
+
+  env = [ "PUID=1000", "PGID=1001", "TZ=Europe/Paris" ]
+
+  networks_advanced {
+    name = var.network
+  }
+
+  volumes {
+    host_path = "/var/local/docker/seedbox/prowlarr_config"
+    container_path = "/config"
+  }
+
+  depends_on = [ docker_image.prowlarr ]
+}
+
+/*resource docker_container "nzbget" {
+  name = "seedbox_nzbget"
+  hostname = "seedbox_nzbget"
+  image = docker_image.nzbget.image_id
+  restart = "unless-stopped"
+
+  env = [ "PUID=1000", "PGID=1001", "TZ=Europe/Paris" ]
+
+  networks_advanced {
+    name = var.network
+  }
+
+  volumes {
+    host_path = "/var/local/docker/seedbox/nzbget_config"
+    container_path = "/config"
+  }
+  volumes {
+    host_path = "/var/local/docker/seedbox/data"
+    container_path = "/data"
+  }
+
+  depends_on = [ docker_image.nzbget ]
+}*/
+
 resource docker_container "rtorrent" {
   name = "seedbox_rtorrent"
   hostname = "seedbox_rtorrent"
@@ -58,10 +182,6 @@ resource docker_container "rtorrent" {
   ports {
     external = "6881"
     internal = "6881"
-  }
-
-  networks_advanced {
-    name = var.network
   }
 
   volumes {
@@ -103,3 +223,49 @@ resource docker_container "jellyfin" {
 
   depends_on = [ docker_image.jellyfin ]
 }
+
+resource docker_container "jfa-go" {
+  name = "seedbox_jfago"
+  hostname = "seedbox_jfago"
+  image = docker_image.jfa_go.image_id
+  restart = "unless-stopped"
+
+  networks_advanced {
+    name = var.network
+  }
+
+  volumes {
+    host_path = "/var/local/docker/seedbox/jfago"
+    container_path = "/data"
+  }
+  volumes {
+    host_path = "/var/local/docker/seedbox/jellyfin_config"
+    container_path =  "/jf"
+  }
+  volumes {
+    host_path = "/etc/localtime"
+    container_path = "/etc/localtime"
+    read_only = true
+  }
+
+  depends_on = [ docker_image.jfa_go ]
+}
+
+/*resource docker_container "reiverr" {
+  name = "seedbox_reiverr"
+  hostname = "seedbox_reiverr"
+  image = docker_image.reiverr.image_id
+  restart = "unless-stopped"
+
+  networks_advanced {
+    name = var.network
+  }
+
+  volumes {
+    host_path = "/var/local/docker/seedbox/reiverr_config"
+    container_path = "/config"
+  }
+
+  depends_on = [ docker_image.reiverr ]
+}*/
+
