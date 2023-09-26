@@ -1,0 +1,5 @@
+description="Add webmention support to the website"
+parameters="WEBMENTION_OWNERSHIP;WEBMENTION_DISPLAY;INDIE_WEB_AUTH"
+parameter.INDIE_WEB_AUTH="Indie Web authent url"
+parameter.WEBMENTION_OWNERSHIP="Webmention domain"
+parameter.WEBMENTION_DISPLAY="none|counter|backlinks|comments"
