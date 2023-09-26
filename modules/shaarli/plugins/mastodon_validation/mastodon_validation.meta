@@ -1,0 +1,3 @@
+description="Add mastodon profile link. (To validate link)"
+parameters="MASTODON_VALIDATION_URL"
+parameter.MASTODON_VALIDATION_URL="https://&lt;instance&gt;/@&lt;username&gt;/"

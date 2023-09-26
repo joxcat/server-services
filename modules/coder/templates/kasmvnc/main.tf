@@ -20,12 +20,14 @@ data "coder_parameter" "install_script" {
   type        = "string"
   description = "Command to run to install the application"
   mutable     = true
+  default     = ""
 }
 data "coder_parameter" "app_to_run" {
   name        = "Application to run"
   type        = "string"
   description = "Application that will be runned in KasmVNC"
   mutable     = true
+  default     = ""
 }
 
 locals {}
@@ -57,49 +59,13 @@ resource "coder_agent" "main" {
     GIT_AUTHOR_EMAIL    = "${data.coder_workspace.me.owner_email}"
     GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
   }
-  metadata {
-    display_name = "CPU Usage"
-    key = "cpu"
-    # calculates CPU usage by summing the "us", "sy" and "id" columns of
-    # vmstat.
-    script = <<EOT
-    top -bn1 | awk 'FNR==3 {printf "%2.0f%%", $2+$3+$4}'
-    EOT
-    interval = 1
-    timeout = 1
-  }
-  metadata {
-    display_name = "Memory Usage"
-    key = "mem"
-    script = <<EOT
-  cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf "%.2fMB", (sum / 1024 / 1024) }'
-    EOT
-    interval = 1
-    timeout = 1
-  }
-  metadata {
-    display_name = "Process Count"
-    key = "proc"
-    script = "ps aux | wc -l"
-    interval = 1
-    timeout = 3
-  }
-  metadata {
-    display_name = "Permanent Data Size"
-    key = "size"
-    script = <<EOT
-    du -h -d1 ~ | awk 'END { print $1 }'
-    EOT
-    interval = 60
-    timeout = 10
-  }
 }
 
 resource "coder_app" "kasm" {
   agent_id     = coder_agent.main.id
   slug         = "kasm"
   display_name = "KasmVNC"
-  url          = "http://localhost:3000/"
+  url          = "http://localhost:6901/"
   subdomain    = true
   share        = "owner"
 }
@@ -130,17 +96,6 @@ resource "docker_volume" "home_volume" {
     value = data.coder_workspace.me.name
   }
 }
-resource "coder_metadata" "home_volume" {
-  count = data.coder_workspace.me.start_count
-  resource_id = docker_volume.home_volume.id
-  hide = true
-
-  item {
-    key = "id"
-    value = docker_volume.home_volume.name
-  }
-}
-
 
 resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.me.id}-kasm"
@@ -156,11 +111,6 @@ resource "docker_image" "main" {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
   }
 }
-resource "coder_metadata" "hide_docker_image" {
-  count = data.coder_workspace.me.start_count
-  resource_id = docker_image.main.image_id
-  hide = true
-}
 
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
@@ -170,14 +120,11 @@ resource "docker_container" "workspace" {
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
   hostname = data.coder_workspace.me.name
   # Use the docker gateway if the access URL is 127.0.0.1
-  entrypoint = ["/init"]
   env = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
-    "CUSTOM_USER=",
-    "PASSWORD=",
     "TITLE=${data.coder_workspace.me.name}",
-    "PUID=0",
-    "PGID=0"
+    "VNC_PW=password",
+    "VNC_VIEW_ONLY_PW=vncviewonlypassword",
   ]
   host {
     host = "host.docker.internal"
@@ -188,7 +135,6 @@ resource "docker_container" "workspace" {
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
-  security_opts = ["seccomp=unconfined"]
 
   # Add labels in Docker to keep track of orphan resources.
   labels {

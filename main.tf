@@ -172,3 +172,8 @@ module "seedbox" {
   source = "./modules/seedbox"
   network = docker_network.internal_proxy.id
 }
+
+module "shaarli" {
+  source = "./modules/shaarli"
+  network = docker_network.internal_proxy.id
+}
