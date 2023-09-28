@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.7.0"
+      version = ">= 0.12"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -11,9 +11,7 @@ terraform {
   }
 }
 
-provider "coder" {
-  feature_use_managed_variables = "true"
-}
+provider "coder" {}
 
 data "coder_parameter" "git_repo" {
   name        = "Git Repository"
@@ -94,7 +92,7 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "RAM Usage"
     key = "1_ram_usage"
-    script = "cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf "%.2fMB", sum/1024/1024 }'"
+    script = "cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf \"%.2fMB\", sum/1024/1024 }'"
     interval = 10
     timeout = 1
   }
@@ -108,7 +106,7 @@ resource "coder_agent" "main" {
   metadata {
     display_name = "Home Disk"
     key = "3_home_disk"
-    script = "du -h -d1 ~ | awk 'END { print $1 }"
+    script = "du -h -d1 ~ | awk 'END { print $1 }'"
     interval = 60
     timeout = 1
   }

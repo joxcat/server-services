@@ -2,18 +2,14 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.7.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "~> 3.0"
     }
   }
 }
 
-provider "coder" {
-  feature_use_managed_variables = "true"
-}
+provider "coder" {}
 
 data "coder_parameter" "install_script" {
   name        = "Install Script"

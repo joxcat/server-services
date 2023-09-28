@@ -27,9 +27,7 @@ locals {
 
 data "coder_provisioner" "me" {}
 
-provider "coder" {
-  feature_use_managed_variables = "true"
-}
+provider "coder" {}
 
 data "coder_parameter" "dotfiles_url" {
   name        = "Dotfiles URL"

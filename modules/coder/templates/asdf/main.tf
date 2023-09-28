@@ -2,7 +2,7 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = "0.7.0"
+      version = ">= 0.12.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -11,9 +11,7 @@ terraform {
   }
 }
 
-provider "coder" {
-  feature_use_managed_variables = "true"
-}
+provider "coder" {}
 
 data "coder_parameter" "git_repo" {
   name        = "Git Repository"
