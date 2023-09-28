@@ -125,10 +125,12 @@ module "ipfs" {
   network = docker_network.internal_proxy.id
 }
 */
+/* // Near 1G of RAM usage wtf
 module "kroki" {
   source = "./modules/kroki"
   network = docker_network.internal_proxy.id
 }
+*/
 
 module "umami" {
   source = "./modules/umami"
