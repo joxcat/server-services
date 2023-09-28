@@ -43,7 +43,7 @@ resource "coder_agent" "main" {
   arch           = data.coder_provisioner.me.arch
   os             = "linux"
   startup_script = <<EOF
-    #!/bin/sh
+    set -e
 
     mkdir -p ~/.local/share
     sudo chown coder:coder ~/.local
@@ -86,39 +86,41 @@ resource "coder_agent" "main" {
   }
   metadata {
     display_name = "CPU Usage"
-    key = "cpu"
-    # calculates CPU usage by summing the "us", "sy" and "id" columns of
-    # vmstat.
-    script = <<EOT
-    top -bn1 | awk 'FNR==3 {printf "%2.0f%%", $2+$3+$4}'
-    EOT
-    interval = 1
+    key = "0_cpu_usage"
+    script = "top -bn1 | awk 'FNR==3 {printf \"%2.0f%%\", $2+$3+$4}'"
+    interval = 10
     timeout = 1
   }
   metadata {
-    display_name = "Memory Usage"
-    key = "mem"
-    script = <<EOT
-    cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf "%.2fMB", sum/1024/1024 }'
-    EOT
-    interval = 1
+    display_name = "RAM Usage"
+    key = "1_ram_usage"
+    script = "cat /sys/fs/cgroup/memory.stat | awk '$1 ~ /^(active_anon|active_file|kernel)$/ { sum += $2 }; END { printf "%.2fMB", sum/1024/1024 }'"
+    interval = 10
     timeout = 1
   }
   metadata {
     display_name = "Process Count"
-    key = "proc"
+    key = "2_proc_count"
     script = "ps aux | wc -l"
-    interval = 1
+    interval = 10
     timeout = 3
   }
   metadata {
-    display_name = "Permanent Data Size"
-    key = "size"
+    display_name = "Home Disk"
+    key = "3_home_disk"
+    script = "du -h -d1 ~ | awk 'END { print $1 }"
+    interval = 60
+    timeout = 1
+  }
+  metadata {
+    display_name = "Load Average (Host)"
+    key = "6_load_host"
+    # get load avg scaled by number of cores
     script = <<EOT
-    du -h -d1 ~ | awk 'END { print $1 }'
+      echo "`cat /proc/loadavg | awk '{ print $1 }'` `nproc`" | awk '{ printf "%0.2f", $1/$2 }'
     EOT
     interval = 60
-    timeout = 10
+    timeout  = 1
   }
 }
 
@@ -164,16 +166,6 @@ resource "docker_volume" "home_volume" {
     value = data.coder_workspace.me.name
   }
 }
-resource "coder_metadata" "home_volume" {
-  count = data.coder_workspace.me.start_count
-  resource_id = docker_volume.home_volume.id
-  hide = true
-
-  item {
-    key = "id"
-    value = docker_volume.home_volume.name
-  }
-}
 
 resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.me.id}-rust"
@@ -183,11 +175,6 @@ resource "docker_image" "main" {
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
   }
-}
-resource "coder_metadata" "hide_docker_image" {
-  count = data.coder_workspace.me.start_count
-  resource_id = docker_image.main.image_id
-  hide = true
 }
 
 resource "docker_container" "workspace" {

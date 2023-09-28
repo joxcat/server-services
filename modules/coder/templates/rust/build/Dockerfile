@@ -46,8 +46,6 @@ RUN cd $HOME/.fonts && \
     rm iosevka.tar.gz && \
     fc-cache -f
 
-# set env variables
-
 # setup rust
 USER 0:0
 RUN apt-get install -y --no-install-recommends \
@@ -58,7 +56,7 @@ RUN apt-get install -y --no-install-recommends \
     libstdc++-10-dev \
     cmake \
     libssl-dev
-RUN git clone https://github.com/rui314/mold.git --depth 1 --branch v1.11.0 /home/${USER}/mold && \
+RUN git clone https://github.com/rui314/mold.git --depth 1 --branch v2.2.0 /home/${USER}/mold && \
     mkdir /home/${USER}/mold/build && \
     cd /home/${USER}/mold/build && \
     cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/usr/bin/clang++ .. && \

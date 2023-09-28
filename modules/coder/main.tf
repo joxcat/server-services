@@ -65,7 +65,8 @@ resource "docker_container" "coder" {
     "CODER_PG_CONNECTION_URL=postgresql://coder:${var.postgres_password}@database/coder?sslmode=disable",
     "CODER_ADDRESS=0.0.0.0:7080",
     "CODER_ACCESS_URL=${var.access_url}",
-    "CODER_WILDCARD_ACCESS_URL=${var.wildcard_url}"
+    "CODER_WILDCARD_ACCESS_URL=${var.wildcard_url}",
+    "CODER_PROC_MEMNICE_ENABLE=true",
   ]
 
   volumes {
