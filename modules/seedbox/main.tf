@@ -15,8 +15,9 @@ resource docker_image "flood" {
   name = "jesec/flood:latest"
 }
 
+// Because of https://github.com/jesec/rtorrent/issues/53
 resource docker_image "rtorrent" {
-  name = "jesec/rtorrent:latest"
+  name = "jesec/rtorrent:master-amd64"
 }
 
 resource docker_image "jfa_go" {
@@ -66,7 +67,10 @@ resource docker_container "flood" {
     container_path = "/data"
   }
 
-  depends_on = [ docker_image.flood ]
+  depends_on = [
+    docker_image.flood,
+    docker_container.rtorrent
+  ]
 }
 
 resource docker_container "radarr" {
@@ -94,7 +98,10 @@ resource docker_container "radarr" {
     container_path = "/data"
   }
 
-  depends_on = [ docker_image.radarr ]
+  depends_on = [
+    docker_image.radarr,
+    docker_container.flood
+  ]
 }
 
 resource docker_container "sonarr" {
@@ -122,7 +129,10 @@ resource docker_container "sonarr" {
     container_path = "/data"
   }
 
-  depends_on = [ docker_image.sonarr ]
+  depends_on = [
+    docker_image.sonarr,
+    docker_container.flood
+  ]
 }
 
 resource docker_container "prowlarr" {
@@ -177,11 +187,20 @@ resource docker_container "rtorrent" {
   user = "1000:1001"
 
   env = [ "HOME=/config" ]
-  command = [ "-o", "network.port_range.set=6881-6881,system.daemon.set=True" ]
+  command = [ "-o", "system.daemon.set=true" ]
+
+  memory = 5120
+  memory_swap = 8192
 
   ports {
     external = "6881"
     internal = "6881"
+    protocol = "tcp"
+  }
+  ports {
+    external = "6881"
+    internal = "6881"
+    protocol = "udp"
   }
 
   volumes {
@@ -190,7 +209,7 @@ resource docker_container "rtorrent" {
   }
   volumes {
     host_path = "/var/local/docker/seedbox/data"
-    container_path = "/data"
+    container_path = "/downloads"
   }
 
   depends_on = [ docker_image.rtorrent ]
