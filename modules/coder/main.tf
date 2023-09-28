@@ -12,7 +12,7 @@ resource "docker_network" "coder" {
 }
 
 resource "docker_image" "coder" {
-  name = "ghcr.io/coder/coder:v2.1.5"
+  name = "ghcr.io/coder/coder:v2.2.0"
 }
 
 resource "docker_container" "coder_database" {
