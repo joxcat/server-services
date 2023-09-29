@@ -8,7 +8,7 @@ terraform {
 }
 
 resource "docker_image" "shaarli" {
-  name = "ghcr.io/shaarli/shaarli:latest"
+  name = "ghcr.io/shaarli/shaarli:v0.12.2"
 }
 
 resource "docker_container" "shaarli" {
