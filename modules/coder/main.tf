@@ -60,13 +60,21 @@ resource "docker_container" "coder" {
   networks_advanced {
     name = var.network
   }
+  networks_advanced {
+    name = "bridge"
+  }
 
   env = [
     "CODER_PG_CONNECTION_URL=postgresql://coder:${var.postgres_password}@database/coder?sslmode=disable",
-    "CODER_ADDRESS=0.0.0.0:7080",
+    "CODER_HTTP_ADDRESS=0.0.0.0:7080",
     "CODER_ACCESS_URL=${var.access_url}",
     "CODER_WILDCARD_ACCESS_URL=${var.wildcard_url}",
-    "CODER_PROC_MEMNICE_ENABLE=true",
+    // https://github.com/coder/coder/issues/9550
+    // "CODER_DERP_SERVER_STUN_ADDRESSES=disable",
+    // "CODER_BLOCK_DIRECT=true",
+    // "CODER_DERP_FORCE_WEBSOCKETS=true",
+    // "CODER_DERP_CONFIG_URL=https://controlplane.tailscale.com/derpmap/default",
+    // "CODER_DERP_SERVER_ENABLE=false"
   ]
 
   volumes {

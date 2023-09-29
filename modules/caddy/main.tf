@@ -10,7 +10,7 @@ terraform {
 resource "docker_image" "caddy" {
   name = "caddy"
   build {
-    context = "modules/caddy"
+    context = "./modules/caddy"
   }
 }
 
@@ -18,9 +18,13 @@ resource "docker_container" "caddy" {
   name = "caddy"
   image = docker_image.caddy.image_id
   restart = "unless-stopped"
-  entrypoint = ["caddy", "run", "--watch", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+  entrypoint = ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
+  
   networks_advanced {
     name = var.network
+  }
+  networks_advanced {
+    name = "bridge"
   }
 
   volumes {

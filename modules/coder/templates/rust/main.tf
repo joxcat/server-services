@@ -2,11 +2,11 @@ terraform {
   required_providers {
     coder = {
       source  = "coder/coder"
-      version = ">= 0.12"
+      version = "~>0.12"
     }
     docker = {
       source  = "kreuzwerker/docker"
-      version = "~> 3.0"
+      version = "~>3.0"
     }
   }
 }
@@ -40,6 +40,7 @@ data "coder_workspace" "me" {}
 resource "coder_agent" "main" {
   arch           = data.coder_provisioner.me.arch
   os             = "linux"
+  startup_script_timeout = 180
   startup_script = <<EOF
     set -e
 
@@ -184,7 +185,15 @@ resource "docker_container" "workspace" {
   hostname = data.coder_workspace.me.name
   # Use the docker gateway if the access URL is 127.0.0.1
   entrypoint = ["sh", "-c", replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")]
-  env        = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
+  env = [
+    "CODER_AGENT_TOKEN=${coder_agent.main.token}",
+    // https://github.com/coder/coder/issues/9550
+    "CODER_DERP_SERVER_STUN_ADDRESSES=disable",
+    "CODER_BLOCK_DIRECT=true",
+    "CODER_DERP_FORCE_WEBSOCKETS=true",
+    "CODER_DERP_CONFIG_URL=https://controlplane.tailscale.com/derpmap/default",
+    "CODER_DERP_SERVER_ENABLE=false"
+  ]
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
