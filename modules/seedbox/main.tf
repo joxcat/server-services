@@ -209,7 +209,7 @@ resource docker_container "rtorrent" {
   }
   volumes {
     host_path = "/var/local/docker/seedbox/data"
-    container_path = "/downloads"
+    container_path = "/data"
   }
 
   depends_on = [ docker_image.rtorrent ]
