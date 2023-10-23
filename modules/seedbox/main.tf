@@ -7,6 +7,10 @@ terraform {
   }
 }
 
+resource docker_network "internal_seedbox" {
+  name = "internal_seedbox"
+}
+
 resource docker_image "jellyfin" {
   name = "lscr.io/linuxserver/jellyfin:latest"
 }
@@ -42,6 +46,10 @@ resource docker_image "sonarr" {
 
 resource docker_image "prowlarr" {
   name = "lscr.io/linuxserver/prowlarr:latest"
+}
+
+resource docker_image "flaresolverr" {
+  name = "ghcr.io/flaresolverr/flaresolverr:latest"
 }
 
 resource docker_container "flood" {
@@ -146,6 +154,9 @@ resource docker_container "prowlarr" {
   networks_advanced {
     name = var.network
   }
+  networks_advanced {
+    name = docker_network.internal_seedbox.id
+  }
 
   volumes {
     host_path = "/var/local/docker/seedbox/prowlarr_config"
@@ -178,6 +189,29 @@ resource docker_container "prowlarr" {
 
   depends_on = [ docker_image.nzbget ]
 }*/
+
+resource docker_container "flaresolverr" {
+  name = "seedbox_flaresolverr"
+  hostname = "seedbox_flaresolverr"
+  image = docker_image.flaresolverr.image_id
+  restart = "unless-stopped"
+
+  env = [
+    "LOG_LEVEL=info",
+    "LOG_HTML=false",
+    "CAPTCHA_SOLVER=none",
+    "TZ=Europe/Paris"
+  ]
+
+  networks_advanced {
+    name = docker_network.internal_seedbox.id
+  }
+
+  depends_on = [
+    docker_image.flaresolverr,
+    docker_network.internal_seedbox
+  ]
+}
 
 resource docker_container "rtorrent" {
   name = "seedbox_rtorrent"
