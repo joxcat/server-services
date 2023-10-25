@@ -37,6 +37,14 @@ resource "docker_container" "shaarli" {
     host_path = abspath("./modules/shaarli/plugins/webmention")
     container_path = "/var/www/shaarli/plugins/webmention"
   }
+  volumes {
+    host_path = abspath("./modules/shaarli/plugins/webhook_on_create")
+    container_path = "/var/www/shaarli/plugins/webhook_on_create"
+  }
+  volumes {
+    host_path = abspath("./modules/shaarli/themes/stack/stack")
+    container_path = "/var/www/shaarli/tpl/stack"
+  }
 
   depends_on = [
     docker_image.shaarli

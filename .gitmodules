@@ -1,7 +1,10 @@
 [submodule "modules/rss-bridge/source"]
 	path = modules/rss-bridge/source
-	url = https://github.com/RSS-Bridge/rss-bridge
+	url = https://github.com/RSS-Bridge/rss-bridge.git
 [submodule "modules/searx/source"]
 	path = modules/searx/source
-	url = https://github.com/joxcat/searxng
+	url = https://github.com/joxcat/searxng.git
 	branch = custom-conf
+[submodule "modules/shaarli/themes/stack"]
+	path = modules/shaarli/themes/stack
+	url = https://github.com/joxcat/shaarli-stack.git

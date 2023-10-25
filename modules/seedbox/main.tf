@@ -16,12 +16,16 @@ resource docker_image "jellyfin" {
 }
 
 resource docker_image "flood" {
-  name = "jesec/flood:latest"
+  name = "jesec/flood:master"
 }
 
 // Because of https://github.com/jesec/rtorrent/issues/53
 resource docker_image "rtorrent" {
-  name = "jesec/rtorrent:master-amd64"
+  name = "rtorrent:alpine"
+  // name = "jesec/rtorrent:master-amd64"
+  build {
+    context = "./modules/seedbox/rtorrent"
+  }
 }
 
 resource docker_image "jfa_go" {
@@ -60,7 +64,12 @@ resource docker_container "flood" {
   user = "1000:1001"
 
   env = [ "HOME=/config" ]
-  command = [ "--port", "3001", "--allowedpath", "/data", "--baseuri", "/torrent" ]
+  command = [
+    "--port", "3001",
+    "--allowedpath", "/data",
+    "--allowedpath", "/config",
+    "--baseuri", "/torrent"
+  ]
 
   networks_advanced {
     name = var.network

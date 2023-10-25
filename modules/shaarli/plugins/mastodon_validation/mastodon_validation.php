@@ -19,7 +19,7 @@ use Shaarli\Plugin\PluginManager;
 function hook_mastodon_validation_render_footer(array $data, ConfigManager $conf)
 {
     $validation_url = trim($conf->get('plugins.MASTODON_VALIDATION_URL', ''));
-    if (! empty($validation_url)) {
+    if (!empty($validation_url)) {
         $data['endofpage'][] = '<a rel="me" style="display:none" href="' . $validation_url . '"></a>';
     }
 
