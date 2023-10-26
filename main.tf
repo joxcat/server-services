@@ -119,12 +119,12 @@ module "pterodactyl" {
   smtp_username = var.pterodactyl_smtp_username
   smtp_password = var.pterodactyl_smtp_password
 }
-/*
+
 module "ipfs" {
   source = "./modules/ipfs"
   network = docker_network.internal_proxy.id
 }
-*/
+
 /* // Near 1G of RAM usage wtf
 module "kroki" {
   source = "./modules/kroki"

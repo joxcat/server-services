@@ -19,11 +19,11 @@ resource "docker_network" "pterodactyl_wings" {
 }
 
 resource "docker_image" "pterodactyl" {
-  name = "ghcr.io/pterodactyl/panel:latest"
+  name = "ghcr.io/pterodactyl/panel:v1.11.5"
 }
 
 resource "docker_image" "pterodactyl_wings" {
-  name = "ghcr.io/pterodactyl/wings:latest"
+  name = "ghcr.io/pterodactyl/wings:v1.11.8"
 }
 
 resource "docker_container" "pterodactyl_redis" {
