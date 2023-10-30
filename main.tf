@@ -184,3 +184,12 @@ module "chat_with_gpt" {
   source = "./modules/chat-with-gpt"
   network = docker_network.internal_proxy.id
 }
+
+module "concourse" {
+  source = "./modules/concourse"
+  network = docker_network.internal_proxy.id
+  postgres_image = docker_image.postgres_15.image_id
+  postgres_password = var.concourse_postgres_password
+  concourse_add_local_user = var.concourse_add_local_user
+  concourse_main_team_local_user = var.concourse_main_team_local_user
+}
