@@ -179,3 +179,8 @@ module "shaarli" {
   source = "./modules/shaarli"
   network = docker_network.internal_proxy.id
 }
+
+module "chat_with_gpt" {
+  source = "./modules/chat-with-gpt"
+  network = docker_network.internal_proxy.id
+}
