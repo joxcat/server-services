@@ -194,12 +194,22 @@ module "concourse" {
   concourse_main_team_local_user = var.concourse_main_team_local_user
 }
 
+/* // NOT Ready yet
 module "grist" {
   source = "./modules/grist"
   network = docker_network.internal_proxy.id
 }
+*/
 
 module "langflow" {
   source = "./modules/langflow"
   network = docker_network.internal_proxy.id
+}
+
+module "flowise" {
+  source = "./modules/flowise"
+  network = docker_network.internal_proxy.id
+
+  flowise_username = var.flowise_username
+  flowise_password = var.flowise_password
 }

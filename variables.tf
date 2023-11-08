@@ -165,3 +165,13 @@ variable "concourse_main_team_local_user" {
   description = "Concourse MAIN_TEAM_LOCAL_USER env"
   type = string
 }
+
+# Flowise
+variable "flowise_username" {
+  description = "Flowise username"
+  type = string
+} 
+variable "flowise_password" {
+  description = "Flowise password"
+  type = string
+} 
