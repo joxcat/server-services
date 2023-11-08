@@ -193,3 +193,13 @@ module "concourse" {
   concourse_add_local_user = var.concourse_add_local_user
   concourse_main_team_local_user = var.concourse_main_team_local_user
 }
+
+module "grist" {
+  source = "./modules/grist"
+  network = docker_network.internal_proxy.id
+}
+
+module "langflow" {
+  source = "./modules/langflow"
+  network = docker_network.internal_proxy.id
+}
