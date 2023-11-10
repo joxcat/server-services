@@ -10,7 +10,7 @@ terraform {
 resource "docker_image" "rss_bridge" {
   name = "rss_bridge"
   build {
-    context = "./modules/rss-bridge/source"
+    context = "${path.module}/source"
   }
 }
 
@@ -24,7 +24,7 @@ resource "docker_container" "rss_bridge" {
   }
 
   volumes {
-    host_path = abspath("./modules/rss-bridge/whitelist.txt")
+    host_path = abspath("${path.module}/whitelist.txt")
     container_path = "/app/whitelist.txt"
   }
 

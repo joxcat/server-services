@@ -10,7 +10,7 @@ terraform {
 resource "docker_image" "caddy" {
   name = "caddy"
   build {
-    context = "./modules/caddy"
+    context = path.module
   }
 }
 

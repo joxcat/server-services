@@ -10,7 +10,7 @@ terraform {
 resource "docker_image" "code_server" {
   name = "code_server"
   build {
-    context = "./modules/code-server"
+    context = path.module
     build_args = {
       UID = "${var.user_id}"
       GID = "${var.user_group}"

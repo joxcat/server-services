@@ -30,19 +30,19 @@ resource "docker_container" "shaarli" {
     container_path = "/var/www/shaarli/cache"
   }
   volumes {
-    host_path = abspath("./modules/shaarli/plugins/mastodon_validation")
+    host_path = abspath("${path.module}/plugins/mastodon_validation")
     container_path = "/var/www/shaarli/plugins/mastodon_validation"
   }
   volumes {
-    host_path = abspath("./modules/shaarli/plugins/webmention")
+    host_path = abspath("${path.module}/plugins/webmention")
     container_path = "/var/www/shaarli/plugins/webmention"
   }
   volumes {
-    host_path = abspath("./modules/shaarli/plugins/webhook_on_create")
+    host_path = abspath("${path.module}/plugins/webhook_on_create")
     container_path = "/var/www/shaarli/plugins/webhook_on_create"
   }
   volumes {
-    host_path = abspath("./modules/shaarli/themes/stack/stack")
+    host_path = abspath("${path.module}/themes/stack/stack")
     container_path = "/var/www/shaarli/tpl/stack"
   }
 

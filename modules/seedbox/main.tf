@@ -24,7 +24,7 @@ resource docker_image "rtorrent" {
   name = "rtorrent:alpine"
   // name = "jesec/rtorrent:master-amd64"
   build {
-    context = "./modules/seedbox/rtorrent"
+    context = "${path.module}/rtorrent"
   }
 }
 

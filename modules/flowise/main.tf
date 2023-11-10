@@ -8,7 +8,13 @@ terraform {
 }
 
 resource "docker_image" "flowise" {
-  name = "flowiseai/flowise:1.3.9"
+  name = "flowise"
+  build {
+    context = path.module
+  }
+  triggers = {
+    dir_sha1 = filesha1("${path.module}/Dockerfile")
+  }
 }
 
 resource "docker_container" "flowise" {

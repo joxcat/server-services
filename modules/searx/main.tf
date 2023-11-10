@@ -14,7 +14,7 @@ resource "docker_network" "searx" {
 resource "docker_image" "searx" {
   name = "searx"
   build {
-    context = "./modules/searx/source"
+    context = "${path.module}/source"
   }
 }
 
@@ -57,15 +57,15 @@ resource "docker_container" "searx" {
   }
 
   volumes {
-    host_path = abspath("./modules/searx/source/data")
+    host_path = abspath("${path.module}/source/data")
     container_path = "/etc/searxng"
   }
   volumes {
-    host_path = abspath("./modules/searx/source/searx/engines")
+    host_path = abspath("${path.module}/source/searx/engines")
     container_path = "/usr/local/searxng/searx/engines"
   }
   volumes {
-    host_path = abspath("./modules/searx/source/plugins")
+    host_path = abspath("${path.module}/source/plugins")
     container_path = "/usr/local/searxng/searx/searx/plugins"
   }
 

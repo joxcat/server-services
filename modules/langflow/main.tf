@@ -10,7 +10,7 @@ terraform {
 resource "docker_image" "langflow" {
   name = "langflow"
   build {
-    context = "./modules/langflow"
+    context = path.module
   }
 }
 

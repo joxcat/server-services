@@ -14,7 +14,7 @@ resource "docker_network" "overleaf" {
 resource "docker_image" "overleaf" {
   name = "overleaf"
   build {
-    context = "./modules/overleaf"
+    context = path.module
   }
 }
 

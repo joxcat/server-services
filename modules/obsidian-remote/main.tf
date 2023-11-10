@@ -10,7 +10,7 @@ terraform {
 resource "docker_image" "obsidian" {
   name = "obsidian"
   build {
-    context = "./modules/obsidian-remote"
+    context = path.module
   }
 }
 

@@ -106,7 +106,7 @@ resource "docker_container" "supabase_kong" {
 
   # https://github.com/supabase/supabase/issues/12661
   volumes {
-    host_path = abspath("./modules/supabase/kong.yml")
+    host_path = abspath("${path.module}/kong.yml")
     container_path = "/var/lib/kong/kong.yml"
     read_only = true
   }
@@ -389,7 +389,7 @@ resource docker_container "supabase_functions" {
   command = ["start", "--main-service", "/home/deno/functions/main"]
 
   volumes {
-    host_path = abspath("./modules/supabase/functions")
+    host_path = abspath("${path.module}/functions")
     container_path = "/home/deno/functions"
   }
 
@@ -441,17 +441,17 @@ resource docker_container "supabase_db" {
   ]
 
   volumes {
-    host_path = abspath("./modules/supabase/realtime.sql")
+    host_path = abspath("${path.module}/realtime.sql")
     container_path = "/docker-entrypoint-initdb.d/migrations/99-realtime.sql"
   }
 
   volumes {
-    host_path = abspath("./modules/supabase/webhooks.sql")
+    host_path = abspath("${path.module}/webhooks.sql")
     container_path = "/docker-entrypoint-initdb.d/migrations/98-webhooks.sql"
   }
 
   volumes {
-    host_path = abspath("./modules/supabase/roles.sql")
+    host_path = abspath("${path.module}/roles.sql")
     container_path = "/docker-entrypoint-initdb.d/migrations/99-roles.sql"
   }
 

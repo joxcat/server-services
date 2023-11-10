@@ -78,7 +78,7 @@ resource "docker_container" "coder" {
   ]
 
   volumes {
-    host_path = abspath("./modules/coder/templates")
+    host_path = abspath("${path.module}/templates")
     container_path = "/home/coder/templates"
   }
   volumes {
