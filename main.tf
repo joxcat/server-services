@@ -86,13 +86,14 @@ module "wordpress-vic" {
   database_password = var.wordpress_vic_database_password
 }
 
+/* // Disabling, moved to Kagi
 module "searx" {
   source = "./modules/searx"
   network = docker_network.internal_proxy.id
 
   redis_image = docker_image.redis.image_id
   host = var.searx_host
-}
+}*/
 
 module "coder" {
   source = "./modules/coder"
@@ -201,6 +202,7 @@ module "grist" {
 }
 */
 
+/* // Not using them for the moment
 module "langflow" {
   source = "./modules/langflow"
   network = docker_network.internal_proxy.id
@@ -212,4 +214,4 @@ module "flowise" {
 
   flowise_username = var.flowise_username
   flowise_password = var.flowise_password
-}
+}*/
