@@ -215,3 +215,8 @@ module "flowise" {
   flowise_username = var.flowise_username
   flowise_password = var.flowise_password
 }*/
+
+module "kellnr" {
+  source = "./modules/kellnr"
+  network = docker_network.internal_proxy.id
+}
