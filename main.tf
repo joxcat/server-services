@@ -29,6 +29,9 @@ resource "docker_image" "redis" {
 resource "docker_image" "redis_5" {
   name = "redis:5"
 }
+resource "docker_image" "redis_7" {
+  name = "redis:7"
+}
 resource "docker_image" "mongo_4" {
   name = "mongo:4.0"
 }
@@ -219,4 +222,11 @@ module "flowise" {
 module "kellnr" {
   source = "./modules/kellnr"
   network = docker_network.internal_proxy.id
+}
+
+module "paperless" {
+  source = "./modules/paperless"
+  network = docker_network.internal_proxy.id
+
+  redis_image = docker_image.redis_7.image_id
 }
