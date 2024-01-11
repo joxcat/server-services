@@ -37,8 +37,7 @@ resource "docker_container" "paperless" {
   env = [
     "PAPERLESS_URL=https://paper.johan.moe",
     "PAPERLESS_REDIS=redis://paperless_redis:6379",
-    // "USE_X_FORWARD_HOST=true",
-    // "USE_X_FORWARD_PORT=true",
+    "PAPERLESS_OCR_USER_ARGS='{\"continue_on_soft_render_error\": true}'",
     "DEBUG=false"
   ]
 
@@ -50,11 +49,11 @@ resource "docker_container" "paperless" {
   }
 
   volumes {
-    host_path = "/var/local/docker/paperless/data"
+    host_path = "/var/local/docker/paperless/data/database"
     container_path = "/usr/src/paperless/data"
   }
   volumes {
-    host_path = "/var/local/docker/paperless/media"
+    host_path = "/var/local/docker/paperless/data/media"
     container_path = "/usr/src/paperless/media"
   }
   volumes {

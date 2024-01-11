@@ -8,7 +8,7 @@ terraform {
 }
 
 resource "docker_image" "kellnr" {
-  name = "ghcr.io/kellnr/kellnr:5.0.0"
+  name = "ghcr.io/kellnr/kellnr:5.1.1"
 }
 
 resource "docker_container" "kellnr" {
