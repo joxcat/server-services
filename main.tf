@@ -80,6 +80,7 @@ module "rss-miniflux" {
   database_password = var.rss_miniflux_database_password
 }
 
+/* // Unused 
 module "wordpress-vic" {
   source = "./modules/wordpress"
   network = docker_network.internal_proxy.id
@@ -88,6 +89,7 @@ module "wordpress-vic" {
   resource_prefix = "vic"
   database_password = var.wordpress_vic_database_password
 }
+*/
 
 /* // Disabling, moved to Kagi
 module "searx" {
@@ -145,17 +147,22 @@ module "umami" {
   app_secret = var.umami_app_secret
 }
 
+/* // Not used
 module "komga" {
   source = "./modules/komga"
   network = docker_network.internal_proxy.id
 }
+*/
 
-/*module "grocy" {
+/* // Not used
+module "grocy" {
   source = "./modules/grocy"
   network = docker_network.internal_proxy.id
-}*/
+}
+*/
 
-/*module "supabase" {
+/* // Useless as it is
+module "supabase" {
   source = "./modules/supabase"
   network = docker_network.internal_proxy.id
 
@@ -172,7 +179,8 @@ module "komga" {
   smtp_admin_email = var.supabase_smtp_admin_email
   studio_public_url = "${var.supabase_site_url}/proxy"
   jwt_secret = var.supabase_jwt_secret
-}*/
+}
+*/
 
 module "seedbox" {
   source = "./modules/seedbox"
@@ -217,16 +225,18 @@ module "flowise" {
 
   flowise_username = var.flowise_username
   flowise_password = var.flowise_password
-}*/
+}
+*/
 
 module "kellnr" {
   source = "./modules/kellnr"
   network = docker_network.internal_proxy.id
 }
 
+/* // Not used
 module "paperless" {
   source = "./modules/paperless"
   network = docker_network.internal_proxy.id
 
   redis_image = docker_image.redis_7.image_id
-}
+}*/

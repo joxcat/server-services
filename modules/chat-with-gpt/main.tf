@@ -8,7 +8,8 @@ terraform {
 }
 
 resource "docker_image" "chat_with_gpt" {
-  name = "ghcr.io/cogentapps/chat-with-gpt:release"
+//  name = "ghcr.io/cogentapps/chat-with-gpt:release"
+  name = "docker.io/jpipu/chat-with-gpt:latest"
 }
 
 resource "docker_container" "chat_with_gpt" {
