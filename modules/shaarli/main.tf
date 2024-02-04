@@ -38,6 +38,10 @@ resource "docker_container" "shaarli" {
     container_path = "/var/www/shaarli/plugins/webmention"
   }
   volumes {
+    host_path = abspath("${path.module}/plugins/umami")
+    container_path = "/var/www/shaarli/plugins/umami"
+  }
+  volumes {
     host_path = abspath("${path.module}/plugins/webhook_on_create")
     container_path = "/var/www/shaarli/plugins/webhook_on_create"
   }

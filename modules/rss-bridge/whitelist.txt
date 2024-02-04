@@ -17,3 +17,4 @@ Reddit
 SoundCloud
 SteamBridge
 XPathBridge
+RewriteBridge

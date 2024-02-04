@@ -192,8 +192,20 @@ module "shaarli" {
   network = docker_network.internal_proxy.id
 }
 
+/* // Moved to lobe-chat
 module "chat_with_gpt" {
   source = "./modules/chat-with-gpt"
+  network = docker_network.internal_proxy.id
+}
+*/
+/* // Really good but not ready yet
+module "lobe_chat" {
+  source = "./modules/lobe-chat"
+  network = docker_network.internal_proxy.id
+}
+*/
+module "ollama" {
+  source = "./modules/ollama"
   network = docker_network.internal_proxy.id
 }
 

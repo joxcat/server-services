@@ -27,6 +27,11 @@ resource "docker_container" "caddy" {
     name = "bridge"
   }
 
+  host {
+    host  = "host.docker.internal"
+    ip    = "host-gateway"
+  }
+
   volumes {
     host_path      = "/var/local/docker/caddy/data"
     container_path = "/data"
