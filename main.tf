@@ -252,8 +252,3 @@ module "paperless" {
 
   redis_image = docker_image.redis_7.image_id
 }*/
-
-module "feedcord" {
-  source = "./modules/feedcord"
-  network = docker_network.internal_proxy.id
-}
