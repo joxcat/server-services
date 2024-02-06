@@ -252,3 +252,7 @@ module "paperless" {
 
   redis_image = docker_image.redis_7.image_id
 }*/
+
+module "rss_forwarder" {
+  source = "./modules/rss-forwarder"
+}
