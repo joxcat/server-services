@@ -256,3 +256,8 @@ module "paperless" {
 module "rss_forwarder" {
   source = "./modules/rss-forwarder"
 }
+
+module "forgejo" {
+  source = "./modules/forgejo"
+  network = docker_network.internal_proxy.id
+}
