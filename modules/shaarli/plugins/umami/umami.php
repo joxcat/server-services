@@ -20,7 +20,7 @@ function hook_umami_render_footer(array $data, ConfigManager $conf)
     $domains = trim($conf->get('plugins.DOMAINS', ''));
 
     if (!empty($website_id)) {
-        $data['endofpage'][] = '<script async src="' . $script_url . '" data-website-id="' . $website_id . '" data-do-not-track="' . $do_not_track . '" data-domains="' . $domains . '" />';
+        $data['endofpage'][] = '<script async src="' . $script_url . '" data-website-id="' . $website_id . '" data-do-not-track="' . $do_not_track . '" data-domains="' . $domains . '"></script>';
     }
 
     return $data;

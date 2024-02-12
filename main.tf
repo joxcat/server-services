@@ -229,7 +229,7 @@ module "grist" {
 module "langflow" {
   source = "./modules/langflow"
   network = docker_network.internal_proxy.id
-}
+}*/
 
 module "flowise" {
   source = "./modules/flowise"
@@ -238,7 +238,6 @@ module "flowise" {
   flowise_username = var.flowise_username
   flowise_password = var.flowise_password
 }
-*/
 
 module "kellnr" {
   source = "./modules/kellnr"
