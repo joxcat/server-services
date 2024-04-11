@@ -8,7 +8,7 @@ terraform {
 }
 
 resource "docker_image" "concourse" {
-  name = "concourse/concourse:7.11.1"
+  name = "concourse/concourse:7.11.2"
 }
 
 resource "docker_network" "internal_concourse" {
