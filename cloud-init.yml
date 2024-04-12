@@ -1,0 +1,85 @@
+#cloud-config
+groups:
+  - docker
+users:
+  - name: johan
+    groups: users, admin, docker
+    sudo: ALL=(ALL) ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHt8EvWzOBZxA7JEQCnknW+hjEi8Id6dfMtb1ONw1xbw johan@johan-lux
+yum_repos:
+  docker-ce:
+    baseurl: https://download.docker.com/linux/fedora/$releasever/$basearch/stable
+    enabled: true
+    name: Docker CE Stable - $basearch
+    gpgcheck: 1
+    gpgkey: https://download.docker.com/linux/fedora/gpg
+packages:
+  - fail2ban
+  #- ufw
+  - git
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+  - zsh
+  - python3
+  - fuse
+  - opentofu
+package_update: true
+package_upgrade: true
+write_files:
+  - path: /etc/docker/daemon.json
+    content: |
+      {
+        "ipv6": true,
+        "fixed-cidr-v6": "2001:db8:1::/64",
+        "experimental": true,
+        "ip6tables": true
+      }
+    owner: root:root
+    permissions: "0644"
+  - path: /etc/fail2ban/jail.local
+    content: |
+      [sshd]
+      enabled = true
+      banaction = iptables-multiport
+    owner: root:root
+    permissions: "0644"
+runcmd:
+  # Enable fail2ban
+  - systemctl enable fail2ban
+  # Enable ufw
+  #- ufw allow 8080
+  #- ufw enable
+  # Harden SSH
+  - sed -i -e '/^\(#\|\)Port/s/^.*$/Port 8080/' /etc/ssh/sshd_config
+  #- sed -i -e '/^\(#\|\)PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
+  #- sed -i -e '/^\(#\|\)PasswordAuthentication/s/^.*$/PasswordAuthentication no/' /etc/ssh/sshd_config
+  #- sed -i -e '/^\(#\|\)KbdInteractiveAuthentication/s/^.*$/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config
+  #- sed -i -e '/^\(#\|\)ChallengeResponseAuthentication/s/^.*$/ChallengeResponseAuthentication no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)MaxAuthTries/s/^.*$/MaxAuthTries 2/' /etc/ssh/sshd_config
+  #- sed -i -e '/^\(#\|\)AllowTcpForwarding/s/^.*$/AllowTcpForwarding no/' /etc/ssh/sshd_config
+  #- sed -i -e '/^\(#\|\)X11Forwarding/s/^.*$/X11Forwarding no/' /etc/ssh/sshd_config
+  - sed -i -e '/^\(#\|\)AllowAgentForwarding/s/^.*$/AllowAgentForwarding no/' /etc/ssh/sshd_config
+  #- sed -i -e '/^\(#\|\)AuthorizedKeysFile/s/^.*$/AuthorizedKeysFile .ssh\/authorized_keys/' /etc/ssh/sshd_config
+  #- sed -i '$a AllowUsers johan' /etc/ssh/sshd_config
+  # Enable and config docker with ipv6
+  - systemctl enable docker
+  # Add rclone volume plugin to docker
+  - mkdir -p /var/lib/docker-plugins/rclone/config
+  - mkdir -p /var/lib/docker-plugins/rclone/cache
+  - docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
+  # Clone base repos
+  - cd /home/johan
+  - sudo -u johan sh -c 'git clone https://github.com/joxcat/server-services.git'
+  - sudo -u johan sh -c 'git clone https://github.com/joxcat/dotfiles.git'
+  - cd ~
+  # Apply all config changes
+  - reboot
+swap:
+  filename: /swap.img
+  size: "auto" # or size in bytes
+  maxsize: 4294967296 # size in bytes
