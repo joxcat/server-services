@@ -17,11 +17,14 @@ resource "docker_image" "searx" {
     context = "${path.module}/source"
   }
 }
+resource "docker_image" "searx_redis" {
+  name = "redis:alpine"
+}
 
 resource "docker_container" "redis" {
   name = "searx_redis"
   hostname = "redis"
-  image = var.redis_image
+  image = docker_image.searx_redis.image_id
   restart = "unless-stopped"
   command = ["redis-server", "--save", "\"\"", "--appendonly", "no"]
 

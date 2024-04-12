@@ -10,6 +10,9 @@ terraform {
 resource "docker_image" "umami" {
   name = "ghcr.io/umami-software/umami:postgresql-latest"
 }
+resource "docker_image" "umami_postgres" {
+  name = "postgres:15-alpine"
+}
 
 resource "docker_network" "umami" {
   name = "internal_umami"
@@ -18,7 +21,7 @@ resource "docker_network" "umami" {
 resource "docker_container" "umami_database" {
   name = "umami_database"
   hostname = "umami_database"
-  image = var.postgres_image 
+  image = docker_image.umami_postgres.image_id
   restart = "unless-stopped"
   
   networks_advanced {

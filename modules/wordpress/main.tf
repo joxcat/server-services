@@ -14,11 +14,14 @@ resource "docker_network" "wordpress" {
 resource "docker_image" "wordpress" {
   name = "wordpress:5.7"
 }
+resource "docker_image" "wordpress_mysql" {
+  name = "mysql:8"
+}
 
 resource "docker_container" "wordpress_database" {
   name = "${var.resource_prefix}_database"
   hostname = "mysql"
-  image = var.mysql_image
+  image = docker_image.wordpress_mysql.image_id
   restart = "unless-stopped"
 
   networks_advanced {

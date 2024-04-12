@@ -6,9 +6,6 @@ variable "docker_group_id" {
   description = "Docker's group id"
   type = string
 }
-variable "postgres_image" {
-  description = "Postgres's container image"
-}
 variable "postgres_password" {
   description = "Postgres user's password"
 }

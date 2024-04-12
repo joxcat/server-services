@@ -21,15 +21,20 @@ resource "docker_network" "pterodactyl_wings" {
 resource "docker_image" "pterodactyl" {
   name = "ghcr.io/pterodactyl/panel:v1.11.5"
 }
-
 resource "docker_image" "pterodactyl_wings" {
   name = "ghcr.io/pterodactyl/wings:v1.11.8"
+}
+resource "docker_image" "pterodactyl_mariadb" {
+  name = "mariadb:10.5"
+}
+resource "docker_image" "pterodactyl_redis" {
+  name = "redis:alpine"
 }
 
 resource "docker_container" "pterodactyl_redis" {
   name = "pterodactyl_redis"
   hostname = "pterodactyl_redis"
-  image = var.redis_image
+  image = docker_image.pterodactyl_redis.image_id
   restart = "unless-stopped"
 
   networks_advanced {
@@ -42,7 +47,7 @@ resource "docker_container" "pterodactyl_redis" {
 resource "docker_container" "pterodactyl_database" {
   name = "pterodactyl_database"
   hostname = "pterodactyl_database"
-  image = var.mariadb_image
+  image = docker_image.pterodactyl_mariadb.image_id
   restart = "unless-stopped"
 
   command = ["--default-authentication-plugin=mysql_native_password"]

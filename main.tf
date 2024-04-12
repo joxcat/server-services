@@ -13,79 +13,59 @@ resource "docker_network" "internal_proxy" {
   name = "internal_proxy"
 }
 
-# Common images
-resource "docker_image" "mysql_8" {
-  name = "mysql:8"
-}
-resource "docker_image" "postgres_14" {
-  name = "postgres:14"
-}
-resource "docker_image" "postgres_15" {
-  name = "postgres:15-alpine"
-}
-resource "docker_image" "redis" {
-  name = "redis:alpine"
-}
-resource "docker_image" "redis_5" {
-  name = "redis:5"
-}
-resource "docker_image" "redis_7" {
-  name = "redis:7"
-}
-resource "docker_image" "mongo_4" {
-  name = "mongo:4.0"
-}
-resource "docker_image" "mariadb" {
-  name = "mariadb:latest"
-}
-resource "docker_image" "mariadb_10" {
-  name = "mariadb:10.5"
-}
+# module "tailscale" {
+#   source = "./modules/tailscale"
+#   network = docker_network.internal_proxy.id
+#   auth_key = var.tailscale_auth_key
+# }
 
 # Modules
 module "caddy" {
   source = "./modules/caddy"
   network = docker_network.internal_proxy.id
+
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
 }
 
-module "polr" {
-  source = "./modules/polr"
-  mysql_image = docker_image.mysql_8.image_id
-  network = docker_network.internal_proxy.id
+# module "polr" {
+#   source = "./modules/polr"
+#   network = docker_network.internal_proxy.id
 
-  mysql_password = var.polr_mysql_password
-  app_name = var.polr_app_name
-  app_address = var.polr_app_address
-  default_admin_username = var.polr_default_admin_username
-  default_admin_password = var.polr_default_admin_password
-}
+#   mysql_password = var.polr_mysql_password
+#   app_name = var.polr_app_name
+#   app_address = var.polr_app_address
+#   default_admin_username = var.polr_default_admin_username
+#   default_admin_password = var.polr_default_admin_password
+# }
 
-module "rss-bridge" {
-  source = "./modules/rss-bridge"
-  network = docker_network.internal_proxy.id
-}
+# module "rss-bridge" {
+#   source = "./modules/rss-bridge"
+#   network = docker_network.internal_proxy.id
+# }
 
-module "filestash" {
-  source = "./modules/filestash"
-  network = docker_network.internal_proxy.id
+# module "filestash" {
+#   source = "./modules/filestash"
+#   network = docker_network.internal_proxy.id
 
-  config_secret = var.filestash_config_secret
-}
+#   config_secret = var.filestash_config_secret
+# }
 
-module "rss-miniflux" {
-  source = "./modules/rss-miniflux"
-  network = docker_network.internal_proxy.id
+# module "rss-miniflux" {
+#   source = "./modules/rss-miniflux"
+#   network = docker_network.internal_proxy.id
 
-  postgres_image = docker_image.postgres_14.image_id
-  database_password = var.rss_miniflux_database_password
-}
+#   database_password = var.rss_miniflux_database_password
+# }
 
 /* // Unused 
 module "wordpress-vic" {
   source = "./modules/wordpress"
   network = docker_network.internal_proxy.id
 
-  mysql_image = docker_image.mysql_8.image_id
   resource_prefix = "vic"
   database_password = var.wordpress_vic_database_password
 }
@@ -96,40 +76,36 @@ module "searx" {
   source = "./modules/searx"
   network = docker_network.internal_proxy.id
 
-  redis_image = docker_image.redis.image_id
   host = var.searx_host
 }*/
 
-module "coder" {
-  source = "./modules/coder"
-  network = docker_network.internal_proxy.id
+# module "coder" {
+#   source = "./modules/coder"
+#   network = docker_network.internal_proxy.id
 
-  postgres_image = docker_image.postgres_14.image_id
-  postgres_password = var.coder_postgres_password 
-  access_url = var.coder_access_url
-  wildcard_url = var.coder_wildcard_url
-  docker_group_id = "974"
-}
+#   postgres_password = var.coder_postgres_password 
+#   access_url = var.coder_access_url
+#   wildcard_url = var.coder_wildcard_url
+#   docker_group_id = "974"
+# }
 
-module "pterodactyl" {
-  source = "./modules/pterodactyl"
-  network = docker_network.internal_proxy.id
+# module "pterodactyl" {
+#   source = "./modules/pterodactyl"
+#   network = docker_network.internal_proxy.id
 
-  mariadb_image = docker_image.mariadb_10.image_id
-  redis_image = docker_image.redis.image_id
-  mariadb_password = var.pterodactyl_mariadb_password
-  app_url = var.pterodactyl_app_url
-  mail = var.pterodactyl_mail
-  smtp_host = var.pterodactyl_smtp_host
-  smtp_port = var.pterodactyl_smtp_port
-  smtp_username = var.pterodactyl_smtp_username
-  smtp_password = var.pterodactyl_smtp_password
-}
+#   mariadb_password = var.pterodactyl_mariadb_password
+#   app_url = var.pterodactyl_app_url
+#   mail = var.pterodactyl_mail
+#   smtp_host = var.pterodactyl_smtp_host
+#   smtp_port = var.pterodactyl_smtp_port
+#   smtp_username = var.pterodactyl_smtp_username
+#   smtp_password = var.pterodactyl_smtp_password
+# }
 
-module "ipfs" {
-  source = "./modules/ipfs"
-  network = docker_network.internal_proxy.id
-}
+# module "ipfs" {
+#   source = "./modules/ipfs"
+#   network = docker_network.internal_proxy.id
+# }
 
 /* // Near 1G of RAM usage wtf
 module "kroki" {
@@ -138,14 +114,13 @@ module "kroki" {
 }
 */
 
-module "umami" {
-  source = "./modules/umami"
-  network = docker_network.internal_proxy.id
+# module "umami" {
+#   source = "./modules/umami"
+#   network = docker_network.internal_proxy.id
 
-  postgres_image = docker_image.postgres_15.image_id
-  postgres_password = var.umami_postgres_password
-  app_secret = var.umami_app_secret
-}
+#   postgres_password = var.umami_postgres_password
+#   app_secret = var.umami_app_secret
+# }
 
 /* // Not used
 module "komga" {
@@ -182,15 +157,15 @@ module "supabase" {
 }
 */
 
-module "seedbox" {
-  source = "./modules/seedbox"
-  network = docker_network.internal_proxy.id
-}
+# module "seedbox" {
+#   source = "./modules/seedbox"
+#   network = docker_network.internal_proxy.id
+# }
 
-module "shaarli" {
-  source = "./modules/shaarli"
-  network = docker_network.internal_proxy.id
-}
+# module "shaarli" {
+#   source = "./modules/shaarli"
+#   network = docker_network.internal_proxy.id
+# }
 
 /* // Moved to lobe-chat
 module "chat_with_gpt" {
@@ -204,19 +179,18 @@ module "lobe_chat" {
   network = docker_network.internal_proxy.id
 }
 */
-module "ollama" {
-  source = "./modules/ollama"
-  network = docker_network.internal_proxy.id
-}
+# module "ollama" {
+#   source = "./modules/ollama"
+#   network = docker_network.internal_proxy.id
+# }
 
-module "concourse" {
-  source = "./modules/concourse"
-  network = docker_network.internal_proxy.id
-  postgres_image = docker_image.postgres_15.image_id
-  postgres_password = var.concourse_postgres_password
-  concourse_add_local_user = var.concourse_add_local_user
-  concourse_main_team_local_user = var.concourse_main_team_local_user
-}
+# module "concourse" {
+#   source = "./modules/concourse"
+#   network = docker_network.internal_proxy.id
+#   postgres_password = var.concourse_postgres_password
+#   concourse_add_local_user = var.concourse_add_local_user
+#   concourse_main_team_local_user = var.concourse_main_team_local_user
+# }
 
 /* // NOT Ready yet
 module "grist" {
@@ -231,32 +205,30 @@ module "langflow" {
   network = docker_network.internal_proxy.id
 }*/
 
-module "flowise" {
-  source = "./modules/flowise"
-  network = docker_network.internal_proxy.id
+# module "flowise" {
+#   source = "./modules/flowise"
+#   network = docker_network.internal_proxy.id
 
-  flowise_username = var.flowise_username
-  flowise_password = var.flowise_password
-}
+#   flowise_username = var.flowise_username
+#   flowise_password = var.flowise_password
+# }
 
-module "kellnr" {
-  source = "./modules/kellnr"
-  network = docker_network.internal_proxy.id
-}
+# module "kellnr" {
+#   source = "./modules/kellnr"
+#   network = docker_network.internal_proxy.id
+# }
 
 /* // Not used
 module "paperless" {
   source = "./modules/paperless"
   network = docker_network.internal_proxy.id
-
-  redis_image = docker_image.redis_7.image_id
 }*/
 
-module "rss_forwarder" {
-  source = "./modules/rss-forwarder"
-}
+# module "rss_forwarder" {
+#   source = "./modules/rss-forwarder"
+# }
 
-module "forgejo" {
-  source = "./modules/forgejo"
-  network = docker_network.internal_proxy.id
-}
+# module "forgejo" {
+#   source = "./modules/forgejo"
+#   network = docker_network.internal_proxy.id
+# }

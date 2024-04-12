@@ -10,6 +10,9 @@ terraform {
 resource "docker_image" "concourse" {
   name = "concourse/concourse:7.11.2"
 }
+resource "docker_image" "concourse_postgres" {
+  name = "postgres:15-alpine"
+}
 
 resource "docker_network" "internal_concourse" {
   name = "internal_concourse"
@@ -18,7 +21,7 @@ resource "docker_network" "internal_concourse" {
 resource "docker_container" "concourse_db" {
   name = "concourse_db"
   hostname = "concourse_db"
-  image = var.postgres_image
+  image = docker_image.concourse_postgres.image_id
   restart = "unless-stopped"
 
   env = [

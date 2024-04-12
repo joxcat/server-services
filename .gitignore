@@ -1,4 +1,7 @@
 .env
+terraform.tfvars.json
 
 .terraform*
 terraform.tfstate*
+
+.vscode/history

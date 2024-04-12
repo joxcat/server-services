@@ -1,10 +1,6 @@
 variable "network" {
   description = "Created container network"
   type = string
-} 
-variable "postgres_image" {
-  description = "Postgres image name"
-  type = string
 }
 variable "postgres_password" {
   description = "Postgres database password"

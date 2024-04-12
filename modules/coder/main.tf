@@ -14,11 +14,14 @@ resource "docker_network" "coder" {
 resource "docker_image" "coder" {
   name = "ghcr.io/coder/coder:v2.8.3"
 }
+resource "docker_image" "coder_postgres" {
+  name = "postgres:14"
+}
 
 resource "docker_container" "coder_database" {
   name = "coder_database"
   hostname = "database"
-  image = var.postgres_image
+  image = docker_image.coder_postgres.image_id
   restart = "unless-stopped"
 
   networks_advanced {

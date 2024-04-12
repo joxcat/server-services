@@ -11,6 +11,9 @@ terraform {
 resource "docker_image" "polr" {
   name = "ajanvier/polr:latest"
 }
+resource "docker_image" "polr_mysql" {
+  name = "mysql:8"
+}
 
 resource "docker_network" "polr" {
   name = "internal_polr"
@@ -19,7 +22,7 @@ resource "docker_network" "polr" {
 resource "docker_container" "polr_database" {
   name = "polr_database"
   hostname = "polr_database"
-  image = var.mysql_image 
+  image = docker_image.polr_mysql.image_id 
   restart = "unless-stopped"
   
   networks_advanced {

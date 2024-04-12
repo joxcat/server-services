@@ -14,11 +14,14 @@ resource "docker_network" "miniflux" {
 resource "docker_image" "miniflux" {
   name = "miniflux/miniflux:2.0.50"
 }
+resource "docker_image" "miniflux_postgres" {
+  name = "postgres:14"
+}
 
 resource "docker_container" "miniflux_database" {
   name = "miniflux_database"
   hostname = "miniflux_database"
-  image = var.postgres_image
+  image = docker_image.miniflux_postgres.image_id
   restart = "unless-stopped"
 
   networks_advanced {

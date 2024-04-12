@@ -3,10 +3,6 @@ variable "network" {
   type = string
 } 
 
-variable "postgres_image" {
-  description = "Concourse postgres image"
-  type = string
-} 
 variable "postgres_password" {
   description = "Concourse postgres password"
   type = string

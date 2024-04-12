@@ -14,11 +14,14 @@ resource "docker_network" "internal_paperless" {
 resource "docker_image" "paperless" {
   name = "ghcr.io/paperless-ngx/paperless-ngx:2.1.3"
 }
+resource "docker_image" "paperless_redis" {
+  name = "redis:7"
+}
 
 resource "docker_container" "paperless_redis" {
   name = "paperless_redis"
   hostname = "paperless_redis"
-  image = var.redis_image
+  image = docker_image.paperless_redis.image_id
   restart = "unless-stopped"
 
   networks_advanced {

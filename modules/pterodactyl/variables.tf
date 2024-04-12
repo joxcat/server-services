@@ -2,14 +2,6 @@ variable "network" {
   description = "Created container network"
   type = string
 }
-variable "mariadb_image" {
-  description = "MariaDB's container image"
-  type = string
-}
-variable "redis_image" {
-  description = "Redis's container image"
-  type = string
-}
 variable "app_url" {
   description = "Public app url"
   type = string

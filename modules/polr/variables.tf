@@ -20,10 +20,6 @@ variable "default_admin_password" {
   description = "Polr's default admin password"
   type = string
 }
-variable "mysql_image" {
-  description = "MySQL docker image"
-  type = string
-}
 variable "network" {
   description = "Created container network"
   type = string

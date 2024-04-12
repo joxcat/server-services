@@ -14,6 +14,61 @@ resource "docker_image" "caddy" {
   }
 }
 
+resource "docker_volume" "caddy_data" {
+  name = "caddy_data"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/caddy/data"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+resource "docker_volume" "caddy_state" {
+  name = "caddy_state"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/caddy/state"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+resource "docker_volume" "caddy_config" {
+  name = "caddy_config"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/caddy/config"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
 resource "docker_container" "caddy" {
   name = "caddy"
   image = docker_image.caddy.image_id
@@ -33,41 +88,36 @@ resource "docker_container" "caddy" {
   }
 
   volumes {
-    host_path      = "/var/local/docker/caddy/data"
+    volume_name = docker_volume.caddy_data.name
     container_path = "/data"
   }
   volumes {
-    host_path      = "/var/local/docker/caddy/config"
+    volume_name = docker_volume.caddy_state.name
     container_path = "/config"
   }
   volumes {
-    host_path      = "/var/local/docker/caddy/Caddyfile"
-    container_path = "/etc/caddy/Caddyfile"
+    volume_name = docker_volume.caddy_config.name
+    container_path = "/etc/caddy"
   }
-  volumes {
-    host_path      = "/var/local/docker/caddy/caddyfiles"
-    container_path = "/etc/caddy/caddyfiles"
-  }
-
   ports {
-    ip       = "65.21.230.238"
     external = 80
     internal = 80
+    protocol = "tcp"
   }
   ports {
-    ip       = "2a01:4f9:6a:1d8f::2"
     external = 80
     internal = 80
+    protocol = "udp"
   }
   ports {
-    ip       = "65.21.230.238"
     external = 443
     internal = 443
+    protocol = "tcp"
   }
   ports {
-    ip       = "2a01:4f9:6a:1d8f::2"
     external = 443
     internal = 443
+    protocol = "udp"
   }
 
   depends_on = [
