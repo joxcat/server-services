@@ -18,6 +18,43 @@ resource "docker_network" "internal_concourse" {
   name = "internal_concourse"
 }
 
+resource "docker_volume" "concourse_data" {
+  name = "concourse_data"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/concourse/data"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+resource "docker_volume" "concourse_keys" {
+  name = "concourse_keys"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/concourse/keys"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
 resource "docker_container" "concourse_db" {
   name = "concourse_db"
   hostname = "concourse_db"
@@ -36,7 +73,7 @@ resource "docker_container" "concourse_db" {
   }
 
   volumes {
-    host_path = "/var/local/docker/concourse/data"
+    volume_name = docker_volume.concourse_data.name
     container_path = "/database"
   }
 }
@@ -64,7 +101,7 @@ resource "docker_container" "concourse_worker" {
   ]
 
   volumes {
-    host_path = "/var/local/docker/concourse/keys"
+    volume_name = docker_volume.concourse_keys.name
     container_path = "/concourse-keys"
   }
 
@@ -101,7 +138,7 @@ resource "docker_container" "concourse" {
   ]
 
   volumes {
-    host_path = "/var/local/docker/concourse/keys"
+    volume_name = docker_volume.concourse_keys.name
     container_path = "/concourse-keys"
   }
 

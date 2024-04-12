@@ -18,6 +18,25 @@ resource "docker_network" "umami" {
   name = "internal_umami"
 }
 
+resource "docker_volume" "umami_data" {
+  name = "umami_data"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/umami/data"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
 resource "docker_container" "umami_database" {
   name = "umami_database"
   hostname = "umami_database"
@@ -29,7 +48,7 @@ resource "docker_container" "umami_database" {
   }
 
   volumes {
-    host_path = "/var/local/docker/umami/data"
+    volume_name = docker_volume.umami_data.name
     container_path = "/var/lib/postgresql/data"
   }
 

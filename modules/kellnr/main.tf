@@ -11,6 +11,25 @@ resource "docker_image" "kellnr" {
   name = "ghcr.io/kellnr/kellnr:5.1.2"
 }
 
+resource "docker_volume" "kellnr_data" {
+  name = "kellnr_data"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/kellnr/data"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
 resource "docker_container" "kellnr" {
   name = "kellnr"
   hostname = "kellnr"
@@ -29,7 +48,7 @@ resource "docker_container" "kellnr" {
   }
 
   volumes {
-    host_path = "/var/local/docker/kellnr/data"
+    volume_name = docker_volume.kellnr_data.name
     container_path = "/opt/kdata"
   }
 

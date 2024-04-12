@@ -11,6 +11,25 @@ resource "docker_image" "ipfs" {
   name = "ipfs/kubo:latest"
 }
 
+resource "docker_volume" "ipfs_data" {
+  name = "ipfs_data"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/ipfs/data"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
 resource "docker_container" "ipfs" {
   name = "ipfs"
   hostname = "ipfs"
@@ -24,24 +43,18 @@ resource "docker_container" "ipfs" {
   }
 
   ports {
-    ip = "0.0.0.0"
     internal = 4001
     external = 4001
     protocol = "tcp"
   }
   ports {
-    ip = "0.0.0.0"
     internal = 4001
     external = 4001
     protocol = "udp"
   }
 
   volumes {
-    host_path = "/var/local/docker/ipfs/share"
-    container_path = "/export"
-  }
-  volumes {
-    host_path = "/var/local/docker/ipfs/data"
+    volume_name = docker_volume.ipfs_data.name
     container_path = "/data/ipfs"
   }
 

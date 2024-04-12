@@ -10,17 +10,34 @@ terraform {
 resource "docker_image" "forgejo" {
   name = "codeberg.org/forgejo/forgejo:1.21.5-0"
 }
-
 resource "docker_image" "dind" {
   name = "docker:dind"
 }
-
 resource "docker_image" "forgejo_runner" {
   name = "code.forgejo.org/forgejo/runner:3.3.0"
 }
 
 resource "docker_network" "internal_forgejo" {
   name = "internal_forgejo"
+}
+
+resource "docker_volume" "forgejo_data" {
+  name = "forgejo_data"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/forgejo/data"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "docker_container" "forgejo" {
@@ -44,7 +61,7 @@ resource "docker_container" "forgejo" {
   }
 
   volumes {
-    host_path = "/var/local/docker/forgejo/data"
+    volume_name = docker_volume.forgejo_data.name
     container_path = "/data"
   }
   volumes {

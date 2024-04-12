@@ -31,35 +31,53 @@ module "caddy" {
   sftp_password = var.sftp_password
 }
 
-# module "polr" {
-#   source = "./modules/polr"
-#   network = docker_network.internal_proxy.id
+module "polr" {
+  source = "./modules/polr"
+  network = docker_network.internal_proxy.id
 
-#   mysql_password = var.polr_mysql_password
-#   app_name = var.polr_app_name
-#   app_address = var.polr_app_address
-#   default_admin_username = var.polr_default_admin_username
-#   default_admin_password = var.polr_default_admin_password
-# }
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
 
-# module "rss-bridge" {
-#   source = "./modules/rss-bridge"
-#   network = docker_network.internal_proxy.id
-# }
+  mysql_password = var.polr_mysql_password
+  app_name = var.polr_app_name
+  app_address = var.polr_app_address
+  default_admin_username = var.polr_default_admin_username
+  default_admin_password = var.polr_default_admin_password
+}
 
-# module "filestash" {
-#   source = "./modules/filestash"
-#   network = docker_network.internal_proxy.id
+module "rss-bridge" {
+  source = "./modules/rss-bridge"
+  network = docker_network.internal_proxy.id
+}
 
-#   config_secret = var.filestash_config_secret
-# }
+module "filestash" {
+  source = "./modules/filestash"
+  network = docker_network.internal_proxy.id
 
-# module "rss-miniflux" {
-#   source = "./modules/rss-miniflux"
-#   network = docker_network.internal_proxy.id
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
 
-#   database_password = var.rss_miniflux_database_password
-# }
+  config_secret = var.filestash_config_secret
+}
+
+module "rss-miniflux" {
+  source = "./modules/rss-miniflux"
+  network = docker_network.internal_proxy.id
+
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+
+  database_password = var.rss_miniflux_database_password
+}
 
 /* // Unused 
 module "wordpress-vic" {
@@ -79,33 +97,46 @@ module "searx" {
   host = var.searx_host
 }*/
 
-# module "coder" {
-#   source = "./modules/coder"
-#   network = docker_network.internal_proxy.id
+module "coder" {
+  source = "./modules/coder"
+  network = docker_network.internal_proxy.id
 
-#   postgres_password = var.coder_postgres_password 
-#   access_url = var.coder_access_url
-#   wildcard_url = var.coder_wildcard_url
-#   docker_group_id = "974"
-# }
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
 
-# module "pterodactyl" {
-#   source = "./modules/pterodactyl"
-#   network = docker_network.internal_proxy.id
+  postgres_password = var.coder_postgres_password 
+  access_url = var.coder_access_url
+  wildcard_url = var.coder_wildcard_url
+  docker_group_id = "974"
+}
 
-#   mariadb_password = var.pterodactyl_mariadb_password
-#   app_url = var.pterodactyl_app_url
-#   mail = var.pterodactyl_mail
-#   smtp_host = var.pterodactyl_smtp_host
-#   smtp_port = var.pterodactyl_smtp_port
-#   smtp_username = var.pterodactyl_smtp_username
-#   smtp_password = var.pterodactyl_smtp_password
-# }
+/* // Not used, too much support needed
+module "pterodactyl" {
+  source = "./modules/pterodactyl"
+  network = docker_network.internal_proxy.id
 
-# module "ipfs" {
-#   source = "./modules/ipfs"
-#   network = docker_network.internal_proxy.id
-# }
+  mariadb_password = var.pterodactyl_mariadb_password
+  app_url = var.pterodactyl_app_url
+  mail = var.pterodactyl_mail
+  smtp_host = var.pterodactyl_smtp_host
+  smtp_port = var.pterodactyl_smtp_port
+  smtp_username = var.pterodactyl_smtp_username
+  smtp_password = var.pterodactyl_smtp_password
+} */
+
+module "ipfs" {
+  source = "./modules/ipfs"
+  network = docker_network.internal_proxy.id
+
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+}
 
 /* // Near 1G of RAM usage wtf
 module "kroki" {
@@ -114,13 +145,19 @@ module "kroki" {
 }
 */
 
-# module "umami" {
-#   source = "./modules/umami"
-#   network = docker_network.internal_proxy.id
+module "umami" {
+  source = "./modules/umami"
+  network = docker_network.internal_proxy.id
 
-#   postgres_password = var.umami_postgres_password
-#   app_secret = var.umami_app_secret
-# }
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+
+  postgres_password = var.umami_postgres_password
+  app_secret = var.umami_app_secret
+}
 
 /* // Not used
 module "komga" {
@@ -157,15 +194,27 @@ module "supabase" {
 }
 */
 
-# module "seedbox" {
-#   source = "./modules/seedbox"
-#   network = docker_network.internal_proxy.id
-# }
+module "seedbox" {
+  source = "./modules/seedbox"
+  network = docker_network.internal_proxy.id
 
-# module "shaarli" {
-#   source = "./modules/shaarli"
-#   network = docker_network.internal_proxy.id
-# }
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+}
+
+module "shaarli" {
+  source = "./modules/shaarli"
+  network = docker_network.internal_proxy.id
+
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+}
 
 /* // Moved to lobe-chat
 module "chat_with_gpt" {
@@ -179,18 +228,30 @@ module "lobe_chat" {
   network = docker_network.internal_proxy.id
 }
 */
-# module "ollama" {
-#   source = "./modules/ollama"
-#   network = docker_network.internal_proxy.id
-# }
+module "ollama" {
+  source = "./modules/ollama"
+  network = docker_network.internal_proxy.id
 
-# module "concourse" {
-#   source = "./modules/concourse"
-#   network = docker_network.internal_proxy.id
-#   postgres_password = var.concourse_postgres_password
-#   concourse_add_local_user = var.concourse_add_local_user
-#   concourse_main_team_local_user = var.concourse_main_team_local_user
-# }
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+}
+
+module "concourse" {
+  source = "./modules/concourse"
+  network = docker_network.internal_proxy.id
+  postgres_password = var.concourse_postgres_password
+  concourse_add_local_user = var.concourse_add_local_user
+  concourse_main_team_local_user = var.concourse_main_team_local_user
+
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+}
 
 /* // NOT Ready yet
 module "grist" {
@@ -205,18 +266,25 @@ module "langflow" {
   network = docker_network.internal_proxy.id
 }*/
 
-# module "flowise" {
-#   source = "./modules/flowise"
-#   network = docker_network.internal_proxy.id
+/* // Not using them for the moment
+module "flowise" {
+  source = "./modules/flowise"
+  network = docker_network.internal_proxy.id
 
-#   flowise_username = var.flowise_username
-#   flowise_password = var.flowise_password
-# }
+  flowise_username = var.flowise_username
+  flowise_password = var.flowise_password
+}*/
 
-# module "kellnr" {
-#   source = "./modules/kellnr"
-#   network = docker_network.internal_proxy.id
-# }
+module "kellnr" {
+  source = "./modules/kellnr"
+  network = docker_network.internal_proxy.id
+
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+}
 
 /* // Not used
 module "paperless" {
@@ -224,11 +292,23 @@ module "paperless" {
   network = docker_network.internal_proxy.id
 }*/
 
-# module "rss_forwarder" {
-#   source = "./modules/rss-forwarder"
-# }
+module "rss_forwarder" {
+  source = "./modules/rss-forwarder"
 
-# module "forgejo" {
-#   source = "./modules/forgejo"
-#   network = docker_network.internal_proxy.id
-# }
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+}
+
+module "forgejo" {
+  source = "./modules/forgejo"
+  network = docker_network.internal_proxy.id
+
+  sftp_path = "/home"
+  sftp_host = var.sftp_host
+  sftp_port = var.sftp_port
+  sftp_user = var.sftp_user
+  sftp_password = var.sftp_password
+}

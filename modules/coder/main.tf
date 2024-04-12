@@ -18,6 +18,25 @@ resource "docker_image" "coder_postgres" {
   name = "postgres:14"
 }
 
+resource "docker_volume" "coder_data" {
+  name = "coder_data"
+  driver = "rclone:latest"
+  
+  driver_opts = {
+    path = "${var.sftp_path}/coder/data"
+    type = "sftp"
+    sftp-host = var.sftp_host
+    sftp-port = var.sftp_port
+    sftp-user = var.sftp_user
+    sftp-pass = var.sftp_password
+    allow-other = "true"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
 resource "docker_container" "coder_database" {
   name = "coder_database"
   hostname = "database"
@@ -35,7 +54,7 @@ resource "docker_container" "coder_database" {
   ]
 
   volumes {
-    host_path = "/var/local/docker/coder/data"
+    volume_name = docker_volume.coder_data.name
     container_path = "/var/lib/postgresql/data"
   }
 
