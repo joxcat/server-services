@@ -18,43 +18,6 @@ resource "docker_network" "internal_concourse" {
   name = "internal_concourse"
 }
 
-resource "docker_volume" "concourse_data" {
-  name = "concourse_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/concourse/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "concourse_keys" {
-  name = "concourse_keys"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/concourse/keys"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "concourse_db" {
   name = "concourse_db"
   hostname = "concourse_db"
@@ -72,9 +35,10 @@ resource "docker_container" "concourse_db" {
     name = docker_network.internal_concourse.id
   }
 
-  volumes {
-    volume_name = docker_volume.concourse_data.name
-    container_path = "/database"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/concourse/data"
+    target = "/database"
   }
 }
 
@@ -100,9 +64,10 @@ resource "docker_container" "concourse_worker" {
     "CONCOURSE_MAX_BUILD_LOGS_TO_RETAIN=25"
   ]
 
-  volumes {
-    volume_name = docker_volume.concourse_keys.name
-    container_path = "/concourse-keys"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/concourse/keys"
+    target = "/concourse-keys"
   }
 
   networks_advanced {
@@ -137,9 +102,10 @@ resource "docker_container" "concourse" {
     "CONCOURSE_CLUSTER_NAME=dev"
   ]
 
-  volumes {
-    volume_name = docker_volume.concourse_keys.name
-    container_path = "/concourse-keys"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/concourse/keys"
+    target = "/concourse-keys"
   }
 
   networks_advanced {

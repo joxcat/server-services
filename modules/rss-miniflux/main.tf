@@ -18,25 +18,6 @@ resource "docker_image" "miniflux_postgres" {
   name = "postgres:14"
 }
 
-resource "docker_volume" "miniflux_data" {
-  name = "miniflux_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/rss_miniflux/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "miniflux_database" {
   name = "miniflux_database"
   hostname = "miniflux_database"
@@ -52,9 +33,10 @@ resource "docker_container" "miniflux_database" {
     "POSTGRES_PASSWORD=${var.database_password}"
   ]
 
-  volumes {
-    volume_name = docker_volume.miniflux_data.name
-    container_path = "/var/lib/postgresql/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/rss_miniflux/data"
+    target = "/var/lib/postgresql/data"
   }
 
   healthcheck {
@@ -89,6 +71,7 @@ resource "docker_container" "miniflux" {
 
   depends_on = [
     docker_network.miniflux,
-    docker_image.miniflux
+    docker_image.miniflux,
+    docker_container.miniflux_database
   ]
 }

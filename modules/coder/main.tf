@@ -18,25 +18,6 @@ resource "docker_image" "coder_postgres" {
   name = "postgres:14"
 }
 
-resource "docker_volume" "coder_data" {
-  name = "coder_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/coder/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "coder_database" {
   name = "coder_database"
   hostname = "database"
@@ -53,9 +34,10 @@ resource "docker_container" "coder_database" {
     "POSTGRES_DB=coder"
   ]
 
-  volumes {
-    volume_name = docker_volume.coder_data.name
-    container_path = "/var/lib/postgresql/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/coder/data"
+    target = "/var/lib/postgresql/data"
   }
 
   healthcheck {
@@ -99,13 +81,10 @@ resource "docker_container" "coder" {
     // "CODER_DERP_SERVER_ENABLE=false"
   ]
 
-  volumes {
-    host_path = abspath("${path.module}/templates")
-    container_path = "/home/coder/templates"
-  }
-  volumes {
-    host_path = "/var/run/docker.sock"
-    container_path = "/var/run/docker.sock"
+  mounts {
+    type = "bind"
+    source = "/var/run/docker.sock"
+    target = "/var/run/docker.sock"
   }
 
   group_add = [var.docker_group_id]

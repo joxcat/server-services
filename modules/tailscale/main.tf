@@ -23,9 +23,10 @@ resource "docker_container" "tailscale" {
     name = var.network
   }
 
-  volumes {
-    volume_name = docker_volume.tailscale.name
-    container_path = "/var/lib/postgresql/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/tailscale/data"
+    target = "/var/lib/postgresql/data"
   }
 
   env = [

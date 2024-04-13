@@ -17,25 +17,6 @@ resource "docker_image" "rss_forwarder" {
   }
 }
 
-resource "docker_volume" "rss_forwarder_data" {
-  name = "rss_forwarder_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/rss_forwarder/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "rss_forwarder" {
   name = "rss_forwarder"
   hostname = "rss_forwarder"
@@ -44,9 +25,10 @@ resource "docker_container" "rss_forwarder" {
 
   command = [ "rss-forwarder", "--debug", "/data/config.toml" ]
 
-  volumes {
-    volume_name = docker_volume.rss_forwarder_data.name
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/rss_forwarder/data"
+    target = "/data"
   }
 
   depends_on = [

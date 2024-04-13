@@ -1,4 +1,4 @@
-# SFTP
+# SFTP Mounted Data
 variable "sftp_host" {
   description = "SFTP host"
   type = string

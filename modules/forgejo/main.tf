@@ -21,25 +21,6 @@ resource "docker_network" "internal_forgejo" {
   name = "internal_forgejo"
 }
 
-resource "docker_volume" "forgejo_data" {
-  name = "forgejo_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/forgejo/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "forgejo" {
   name = "forgejo"
   hostname = "forgejo"
@@ -60,18 +41,21 @@ resource "docker_container" "forgejo" {
     name = docker_network.internal_forgejo.id
   }
 
-  volumes {
-    volume_name = docker_volume.forgejo_data.name
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/forgejo/data"
+    target = "/data"
   }
-  volumes {
-    host_path = "/etc/timezone"
-    container_path = "/etc/timezone"
+  mounts {
+    type = "bind"
+    source = "/etc/timezone"
+    target = "/etc/timezone"
     read_only = true
   }
-  volumes {
-    host_path = "/etc/localtime"
-    container_path = "/etc/localtime"
+  mounts {
+    type = "bind"
+    source = "/etc/localtime"
+    target = "/etc/localtime"
     read_only = true
   }
 
@@ -114,9 +98,10 @@ resource "docker_container" "forgejo_runner" {
     name = docker_network.internal_forgejo.id
   }
   
-  volumes {
-    host_path = "/var/local/docker/forgejo/runner"
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/forgejo/runner"
+    target = "/data"
   }
 
   depends_on = [

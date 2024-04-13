@@ -19,25 +19,6 @@ resource "docker_network" "internal_ollama" {
   name = "internal_ollama"
 }
 
-resource "docker_volume" "ollama_data" {
-  name = "ollama_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/ollama/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "ollama" {
   name = "ollama"
   hostname = "ollama"
@@ -68,9 +49,10 @@ resource "docker_container" "ollama_webui" {
     name = docker_network.internal_ollama.id
   }
 
-  volumes {
-    volume_name = docker_volume.ollama_data.name
-    container_path = "/app/backend/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/ollama/data"
+    target = "/app/backend/data"
   }
 
   depends_on = [

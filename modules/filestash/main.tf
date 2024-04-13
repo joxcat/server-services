@@ -18,25 +18,6 @@ resource "docker_image" "filestash" {
   name = "machines/filestash"
 }
 
-resource "docker_volume" "filestash_config" {
-  name = "caddy_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/filestash/config"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "onlyoffice" {
   name = "onlyoffice"
   hostname = "onlyoffice"
@@ -72,13 +53,15 @@ resource "docker_container" "filestash" {
     "CONFIG_SECRET=${var.config_secret}"
   ]
 
-  volumes {
-    volume_name = docker_volume.filestash_config.name
-    container_path = "/app/data/state"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/filestash/config"
+    target = "/app/data/state"
   }
-  volumes {
-    host_path = abspath("${path.module}/local_data")
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = abspath("${path.module}/local_data")
+    target = "/data"
   }
 
   depends_on = [

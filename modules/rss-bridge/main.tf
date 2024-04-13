@@ -19,13 +19,16 @@ resource "docker_container" "rss_bridge" {
   hostname = "rss_bridge"
   image = docker_image.rss_bridge.image_id
   restart = "unless-stopped"
+
   networks_advanced {
     name = var.network
   }
 
-  volumes {
-    host_path = abspath("${path.module}/whitelist.txt")
-    container_path = "/app/whitelist.txt"
+  mounts {
+    type = "bind"
+    source = abspath("${path.module}/whitelist.txt")
+    target = "/app/whitelist.txt"
+    read_only = true
   }
 
   depends_on = [

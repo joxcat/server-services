@@ -11,25 +11,6 @@ resource "docker_image" "shaarli" {
   name = "ghcr.io/shaarli/shaarli:v0.13.0"
 }
 
-resource "docker_volume" "shaarli_data" {
-  name = "shaarli_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/shaarli/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "shaarli" {
   name = "shaarli"
   hostname = "shaarli"
@@ -40,20 +21,23 @@ resource "docker_container" "shaarli" {
     name = var.network
   }
 
-  volumes {
-    volume_name = docker_volume.shaarli_data.name
-    container_path = "/var/www/shaarli/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/shaarli/data"
+    target = "/var/www/shaarli/data"
   }
-  volumes {
-    host_path = abspath("${path.module}/themes/stack/stack")
-    container_path = "/var/www/shaarli/tpl/stack"
+  mounts {
+    type = "bind"
+    source = abspath("${path.module}/themes/stack/stack")
+    target = "/var/www/shaarli/tpl/stack"
   }
 
-  dynamic "volumes" {
+  dynamic "mounts" {
     for_each = distinct(flatten([for _, v in flatten(fileset(path.module, "plugins/**")) : regex("plugins/([^/]*)", dirname(v))]))
     content {
-      host_path = abspath("${path.module}/plugins/${volumes.value}")
-      container_path = "/var/www/shaarli/plugins/${volumes.value}"
+      type = "bind"
+      source = abspath("${path.module}/plugins/${mounts.value}")
+      target = "/var/www/shaarli/plugins/${mounts.value}"
     }
   }
 

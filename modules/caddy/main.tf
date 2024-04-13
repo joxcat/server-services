@@ -14,61 +14,6 @@ resource "docker_image" "caddy" {
   }
 }
 
-resource "docker_volume" "caddy_data" {
-  name = "caddy_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/caddy/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "caddy_state" {
-  name = "caddy_state"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/caddy/state"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "caddy_config" {
-  name = "caddy_config"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/caddy/config"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "caddy" {
   name = "caddy"
   image = docker_image.caddy.image_id
@@ -87,17 +32,20 @@ resource "docker_container" "caddy" {
     ip    = "host-gateway"
   }
 
-  volumes {
-    volume_name = docker_volume.caddy_data.name
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/caddy/data"
+    target = "/data"
   }
-  volumes {
-    volume_name = docker_volume.caddy_state.name
-    container_path = "/config"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/caddy/state"
+    target = "/config"
   }
-  volumes {
-    volume_name = docker_volume.caddy_config.name
-    container_path = "/etc/caddy"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/caddy/config"
+    target = "/etc/caddy"
   }
   ports {
     external = 80

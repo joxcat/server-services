@@ -19,25 +19,6 @@ resource "docker_network" "polr" {
   name = "internal_polr"
 }
 
-resource "docker_volume" "polr_data" {
-  name = "polr_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/polr/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource "docker_container" "polr_database" {
   name = "polr_database"
   hostname = "polr_database"
@@ -48,9 +29,10 @@ resource "docker_container" "polr_database" {
     name = docker_network.polr.id
   }
 
-  volumes {
-    volume_name = docker_volume.polr_data.name
-    container_path = "/var/lib/mysql"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/polr/data"
+    target = "/var/lib/mysql"
   }
 
   env = [

@@ -26,11 +26,17 @@ packages:
   - docker-compose-plugin
   - zsh
   - python3
+  - rclone
+  - sshfs
   - fuse
   - opentofu
 package_update: true
 package_upgrade: true
 write_files:
+  - path: /etc/cron.d/sysmet
+    content: |
+      */5 * * * * /usr/bin/sysmet-notify -vv --env /etc/sysmet/env 2>&1 >> /var/log/sysmet.log
+    owner: root:root
   - path: /etc/docker/daemon.json
     content: |
       {
@@ -48,6 +54,54 @@ write_files:
       banaction = iptables-multiport
     owner: root:root
     permissions: "0644"
+  - path: /etc/sysmet/env
+    content: |
+      MAIL_FROM=
+      MAIL_CONTACTS=
+      SMTP_USER=
+      SMTP_PASSWORD=
+      SMTP_RELAY=
+      LOG_LEVEL=info
+
+      DISK_THRESHOLD=85
+  - path: /usr/lib/systemd/system/mnt-git.service
+    content: |
+      [Unit]
+      Description=Mount remote git fs with sshfs
+      After=network-online.target
+      Wants=network-online.target
+      Before=docker.service
+      StartLimitIntervalSec=300
+      StartLimitBurst=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+      [Service]
+      Type=exec
+      ExecStart=/usr/bin/sshfs -f {{ env "SFTP_USER" }}@{{ env "SFTP_HOST" }}:/home/forgejo/data /var/lib/docker-data/forgejo/data -p 23 -o rw,allow_other,idmap=user,uid=1000,gid=1001,ServerAliveInterval=10,ServerAliveCountMax=1,_netdev
+      ExecStop=/usr/bin/umount /var/lib/docker-data/forgejo/data
+      Restart=on-failure
+      RestartSec=20
+  - path: /usr/lib/systemd/system/mnt-seedbox.service
+    content: |
+      [Unit]
+      Description=Mount remote seedbox fs with sshfs
+      After=network-online.target
+      Wants=network-online.target
+      Before=docker.service
+      StartLimitIntervalSec=300
+      StartLimitBurst=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+      [Service]
+      Type=exec
+      ExecStart=/usr/bin/sshfs -f {{ env "SFTP_USER" }}@{{ env "SFTP_HOST" }}:/home/seedbox/data /var/local/docker/seedbox/data -p 23 -o rw,allow_other,idmap=user,uid=1000,gid=1001,ServerAliveInterval=10,ServerAliveCountMax=1,_netdev
+      ExecStop=/usr/bin/umount /var/local/docker/seedbox/data
+      Restart=on-failure
+      RestartSec=20
 runcmd:
   # Enable fail2ban
   - systemctl enable fail2ban
@@ -68,14 +122,12 @@ runcmd:
   #- sed -i '$a AllowUsers johan' /etc/ssh/sshd_config
   # Enable and config docker with ipv6
   - systemctl enable docker
-  # Add rclone volume plugin to docker
-  - mkdir -p /var/lib/docker-plugins/rclone/config
-  - mkdir -p /var/lib/docker-plugins/rclone/cache
-  - docker plugin install rclone/docker-volume-rclone:amd64 args="-v" --alias rclone --grant-all-permissions
   # Clone base repos
   - cd /home/johan
+  - mkdir -p /home/johan/applications
   - sudo -u johan sh -c 'git clone https://github.com/joxcat/server-services.git'
   - sudo -u johan sh -c 'git clone https://github.com/joxcat/dotfiles.git'
+  - sudo -u johan sh -c 'git clone https://github.com/joxcat/ferrous-sysmet.git'
   - cd ~
   # Apply all config changes
   - reboot

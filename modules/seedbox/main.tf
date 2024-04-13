@@ -41,133 +41,6 @@ resource docker_image "flaresolverr" {
   name = "ghcr.io/flaresolverr/flaresolverr:latest"
 }
 
-resource "docker_volume" "seedbox_data" {
-  name = "seedbox_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/seedbox/data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "seedbox_config" {
-  name = "seedbox_config"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/seedbox/config"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "seedbox_radarr_config" {
-  name = "seedbox_radarr_config"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/seedbox/radarr_config"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "seedbox_sonarr_config" {
-  name = "seedbox_sonarr_config"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/seedbox/sonarr_config"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "seedbox_prowlarr_config" {
-  name = "seedbox_prowlarr_config"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/seedbox/prowlarr_config"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "seedbox_jellyfin_config" {
-  name = "seedbox_jellyfin_config"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/seedbox/jellyfin_config"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-resource "docker_volume" "seedbox_jfago_data" {
-  name = "seedbox_jfago_data"
-  driver = "rclone:latest"
-  
-  driver_opts = {
-    path = "${var.sftp_path}/seedbox/jfa_go_data"
-    type = "sftp"
-    sftp-host = var.sftp_host
-    sftp-port = var.sftp_port
-    sftp-user = var.sftp_user
-    sftp-pass = var.sftp_password
-    allow-other = "true"
-  }
-
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
 resource docker_container "flood" {
   name = "seedbox_flood"
   hostname = "seedbox_flood"
@@ -187,13 +60,15 @@ resource docker_container "flood" {
     name = var.network
   }
 
-  volumes {
-    volume_name = docker_volume.seedbox_config.name
-    container_path = "/config"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/config"
+    target = "/config"
   }
-  volumes {
-    volume_name = docker_volume.seedbox_data.name
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/data"
+    target = "/data"
   }
 
   depends_on = [
@@ -214,17 +89,20 @@ resource docker_container "radarr" {
     name = var.network
   }
 
-  volumes {
-    volume_name = docker_volume.seedbox_radarr_config.name
-    container_path = "/config"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/radarr_config"
+    target = "/config"
   }
-  volumes {
-    host_path = "${docker_volume.seedbox_config.mountpoint}/.local/share/rtorrent"
-    container_path = "/config/.local/share/rtorrent"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/config/.local/share/rtorrent"
+    target = "/config/.local/share/rtorrent"
   }
-  volumes {
-    volume_name = docker_volume.seedbox_data.name
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/data"
+    target = "/data"
   }
 
   depends_on = [
@@ -245,17 +123,20 @@ resource docker_container "sonarr" {
     name = var.network
   }
 
-  volumes {
-    volume_name = docker_volume.seedbox_sonarr_config.name
-    container_path = "/config"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/sonarr_config"
+    target = "/config"
   }
-  volumes {
-    host_path = "${docker_volume.seedbox_config.mountpoint}/.local/share/rtorrent"
-    container_path = "/config/.local/share/rtorrent"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/config/.local/share/rtorrent"
+    target = "/config/.local/share/rtorrent"
   }
-  volumes {
-    volume_name = docker_volume.seedbox_data.name
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/data"
+    target = "/data"
   }
 
   depends_on = [
@@ -279,9 +160,10 @@ resource docker_container "prowlarr" {
     name = docker_network.internal_seedbox.id
   }
 
-  volumes {
-    volume_name = docker_volume.seedbox_prowlarr_config.name
-    container_path = "/config"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/prowlarr_config"
+    target = "/config"
   }
 
   depends_on = [ docker_image.prowlarr ]
@@ -334,13 +216,15 @@ resource docker_container "rtorrent" {
     protocol = "udp"
   }
 
-  volumes {
-    volume_name = docker_volume.seedbox_config.name
-    container_path = "/config"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/config"
+    target = "/config"
   }
-  volumes {
-    volume_name = docker_volume.seedbox_data.name
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/data"
+    target = "/data"
   }
 
   depends_on = [ docker_image.rtorrent ]
@@ -362,13 +246,15 @@ resource docker_container "jellyfin" {
     name = var.network
   }
 
-  volumes {
-    volume_name = docker_volume.seedbox_jellyfin_config.name
-    container_path = "/config"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/jellyfin_config"
+    target = "/config"
   }
-  volumes {
-    volume_name = docker_volume.seedbox_data.name
-    container_path = "/home"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/data"
+    target = "/home"
   }
 
   depends_on = [ docker_image.jellyfin ]
@@ -384,17 +270,20 @@ resource docker_container "jfa-go" {
     name = var.network
   }
 
-  volumes {
-    volume_name = docker_volume.seedbox_jfago_data.name
-    container_path = "/data"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/jfago_data"
+    target = "/data"
   }
-  volumes {
-    volume_name = docker_volume.seedbox_jellyfin_config.name
-    container_path =  "/jf"
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/seedbox/jellyfin_config"
+    target =  "/jf"
   }
-  volumes {
-    host_path = "/etc/localtime"
-    container_path = "/etc/localtime"
+  mounts {
+    type = "bind"
+    source = "/etc/localtime"
+    target = "/etc/localtime"
     read_only = true
   }
 
