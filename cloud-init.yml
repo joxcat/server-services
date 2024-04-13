@@ -99,8 +99,27 @@ write_files:
 
       [Service]
       Type=exec
-      ExecStart=/usr/bin/sshfs -f {{ env "SFTP_USER" }}@{{ env "SFTP_HOST" }}:/home/seedbox/data /var/local/docker/seedbox/data -p 23 -o rw,allow_other,idmap=user,uid=1000,gid=1001,ServerAliveInterval=10,ServerAliveCountMax=1,_netdev
-      ExecStop=/usr/bin/umount /var/local/docker/seedbox/data
+      ExecStart=/usr/bin/sshfs -f {{ env "SFTP_USER" }}@{{ env "SFTP_HOST" }}:/home/seedbox/data /var/lib/docker-data/seedbox/data -p 23 -o rw,allow_other,idmap=user,uid=1000,gid=1001,ServerAliveInterval=10,ServerAliveCountMax=1,_netdev
+      ExecStop=/usr/bin/umount /var/lib/docker-data/seedbox/data
+      Restart=on-failure
+      RestartSec=20
+  - path: /usr/lib/systemd/system/mnt-ipfs.service
+    content: |
+      [Unit]
+      Description=Mount remote ipfs fs with sshfs
+      After=network-online.target
+      Wants=network-online.target
+      Before=docker.service
+      StartLimitIntervalSec=300
+      StartLimitBurst=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+      [Service]
+      Type=exec
+      ExecStart=/usr/bin/sshfs -f {{ env "SFTP_USER" }}@{{ env "SFTP_HOST" }}:/home/ipfs/blocks /var/lib/docker-data/ipfs/blocks -p 23 -o rw,allow_other,idmap=user,uid=1000,gid=1001,ServerAliveInterval=10,ServerAliveCountMax=1,_netdev
+      ExecStop=/usr/bin/umount /var/lib/docker-data/ipfs/blocks
       Restart=on-failure
       RestartSec=20
 runcmd:
