@@ -1,4 +1,5 @@
 #cloud-config
+
 groups:
   - docker
 users:
@@ -122,12 +123,19 @@ runcmd:
   #- sed -i '$a AllowUsers johan' /etc/ssh/sshd_config
   # Enable and config docker with ipv6
   - systemctl enable docker
+  # Install rustup
+  - sudo -u johan sh -c 'curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y'
   # Clone base repos
   - cd /home/johan
   - mkdir -p /home/johan/applications
   - sudo -u johan sh -c 'git clone https://github.com/joxcat/server-services.git'
   - sudo -u johan sh -c 'git clone https://github.com/joxcat/dotfiles.git'
-  - sudo -u johan sh -c 'git clone https://github.com/joxcat/ferrous-sysmet.git'
+  - |
+    sudo -u johan sh -c 'git clone https://github.com/joxcat/ferrous-sysmet.git /home/johan/applications/ferrous-sysmet' && \
+    pushd /home/johan/applications/ferrous-sysmet && \
+    sudo -u johan sh -c 'cargo build --release' && \
+    cp target/release/ferrous-sysmet /usr/local/bin && \
+    popd
   - cd ~
   # Apply all config changes
   - reboot
