@@ -18,6 +18,7 @@ resource "docker_container" "ipfs" {
   restart = "unless-stopped"
 
   memory = 1024
+  memory_swap = 1024
 
   env = [ "IPFS_PROFILE=server" ]
 
