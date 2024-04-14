@@ -228,3 +228,8 @@ module "forgejo" {
   source = "./modules/forgejo"
   network = docker_network.internal_proxy.id
 }
+
+module "homepage" {
+  source = "./modules/homepage"
+  network = docker_network.internal_proxy.id
+}
