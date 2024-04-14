@@ -32,6 +32,7 @@ resource "docker_container" "tailscale" {
   env = [
     "TS_STATE_DIR=/var/lib/tailscale",
     "TS_AUTHKEY=${var.auth_key}",
+    "TS_EXTRA_ARGS=--advertise-connector --advertise-tags=tag:connector"
   ]
 
   depends_on = [
