@@ -26,7 +26,7 @@ resource "docker_container" "tailscale" {
   mounts {
     type = "bind"
     source = "/var/lib/docker-data/tailscale/data"
-    target = "/var/lib/postgresql/data"
+    target = "/var/lib/tailscale"
   }
 
   env = [

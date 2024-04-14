@@ -13,11 +13,11 @@ resource "docker_network" "internal_proxy" {
   name = "internal_proxy"
 }
 
-module "tailscale" {
+/*module "tailscale" {
   source = "./modules/tailscale"
   network = docker_network.internal_proxy.id
   auth_key = var.tailscale_auth_key
-}
+}*/
 
 # Modules
 module "caddy" {
