@@ -4,7 +4,7 @@ groups:
   - docker
 users:
   - name: johan
-    groups: users, docker
+    groups: users, johan, docker
     sudo: ALL=(ALL) ALL
     shell: /bin/bash
     ssh_authorized_keys:
@@ -138,7 +138,40 @@ write_files:
       ExecStop=/usr/bin/umount /var/lib/docker-data/ipfs/blocks
       Restart=on-failure
       RestartSec=20
+  - path: /etc/ufw/applications.d/custom
+    content: |
+      [IPFS]
+      title=IPFS
+      description=IPFS Server
+      ports=4001/tcp|4001/udp
+
+      [Syncthing]
+      title=Syncthing
+      description=Syncthing Sync Server
+      ports=22000/tcp|22000/udp
+
+      [SMTPS]
+      title=Mail server (SMTPS)
+      description=Secure mail server (SMTPS)
+      ports=465/tcp
+
+      [Flood]
+      title=Flood Torrent
+      description=Flood Torrent Client
+      ports=6881/tcp|6881/udp
+
+      [WWW Modern]
+      title=Web Server (HTTP,HTTPS)
+      description=Web Server (HTTP,HTTPS)
+      ports=80,443/tcp|80,443/udp
+
+      [Git]
+      title=Git
+      description=Git Server
+      ports=22/tcp
 runcmd:
+  # Set gids
+  - groupmod -g 978 docker
   # Replace sudo with sudo-rs
   - mv /usr/bin/sudo /usr/bin/.sudo.bak
   - mv /usr/bin/su /usr/bin/.su.bak
@@ -152,7 +185,16 @@ runcmd:
   # - systemctl enable iptables
   # Enable ufw
   - systemctl enable --now ufw
-  - ufw allow 8080
+  - ufw default deny
+  - ufw allow 8080 comment ssh
+  - ufw allow Git
+  - ufw allow IPFS
+  - ufw allow Syncthing
+  - ufw allow Flood
+  - ufw allow "Mail submission"
+  - ufw allow SMTPS
+  - ufw allow IMAPS
+  - ufw allow "WWW Modern"
   - ufw enable
   # Harden SSH
   - sed -i -e '/^\(#\|\)Port/s/^.*$/Port 8080/' /etc/ssh/sshd_config
@@ -184,6 +226,8 @@ runcmd:
     # sudo -u johan sh -c '/home/johan/.cargo/bin/cargo +nightly build --release' && \
     # cp target/release/ferrous-sysmet /usr/local/bin && \
     # popd
+  # Install rust only tools
+  - sudo -u johan sh -c '/home/johan/.cargo/bin/cargo install bandwhich du-dust bottom'
   - cd ~
   # Apply all config changes
   - reboot
