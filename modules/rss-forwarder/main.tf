@@ -27,7 +27,7 @@ resource "docker_container" "rss_forwarder" {
 
   mounts {
     type = "bind"
-    source = "/var/lib/docker-data/rss_forwarder/data"
+    source = "/var/lib/docker-data/rss-forwarder/data"
     target = "/data"
   }
 

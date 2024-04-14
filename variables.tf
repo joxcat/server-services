@@ -40,20 +40,6 @@ variable "polr_default_admin_password" {
   type = string
 }
 
-# ShareFTP
-variable "shareftp_host" {
-  description = "ShareFTP host"
-  type = string
-}
-variable "shareftp_username" {
-  description = "ShareFTP Basic Auth username"
-  type = string
-}
-variable "shareftp_password" {
-  description = "ShareFTP Basic Auth password"
-  type = string
-}
-
 # Filestash
 variable "filestash_config_secret" {
   description = "Filestash's config encryption secret"
@@ -69,12 +55,6 @@ variable "rss_miniflux_database_password" {
 # Wordpress Vic
 variable "wordpress_vic_database_password" {
   description = "Wordpress's database password"
-  type = string
-}
-
-# SearX
-variable "searx_host" {
-  description = "SearX's host"
   type = string
 }
 

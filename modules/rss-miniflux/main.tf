@@ -35,7 +35,7 @@ resource "docker_container" "miniflux_database" {
 
   mounts {
     type = "bind"
-    source = "/var/lib/docker-data/rss_miniflux/data"
+    source = "/var/lib/docker-data/rss-miniflux/data"
     target = "/var/lib/postgresql/data"
   }
 

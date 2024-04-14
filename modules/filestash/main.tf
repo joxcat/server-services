@@ -7,32 +7,32 @@ terraform {
   }
 }
 
-resource "docker_network" "filestash" {
-  name = "filestash_internal"
-}
+# resource "docker_network" "filestash" {
+#   name = "filestash_internal"
+# }
 
-resource "docker_image" "onlyoffice" {
-  name = "onlyoffice/documentserver"
-}
+# resource "docker_image" "onlyoffice" {
+#   name = "onlyoffice/documentserver"
+# }
 resource "docker_image" "filestash" {
   name = "machines/filestash"
 }
 
-resource "docker_container" "onlyoffice" {
-  name = "onlyoffice"
-  hostname = "onlyoffice"
-  image = docker_image.onlyoffice.image_id
-  restart = "unless-stopped"
+# resource "docker_container" "onlyoffice" {
+#   name = "onlyoffice"
+#   hostname = "onlyoffice"
+#   image = docker_image.onlyoffice.image_id
+#   restart = "unless-stopped"
 
-  networks_advanced {
-    name = docker_network.filestash.id
-  }
+#   networks_advanced {
+#     name = docker_network.filestash.id
+#   }
 
-  depends_on = [
-    docker_network.filestash,
-    docker_image.onlyoffice
-  ]
-}
+#   depends_on = [
+#     docker_network.filestash,
+#     docker_image.onlyoffice
+#   ]
+# }
 
 resource "docker_container" "filestash" {
   name = "filestash"
@@ -40,16 +40,16 @@ resource "docker_container" "filestash" {
   image = docker_image.filestash.image_id
   restart = "unless-stopped"
 
-  networks_advanced {
-    name = docker_network.filestash.id
-  }
+  # networks_advanced {
+  #   name = docker_network.filestash.id
+  # }
   networks_advanced {
     name = var.network
   }
 
   env = [
     "APPLICATION_URL=",
-    "ONLYOFFICE_URL=http://onlyoffice",
+    # "ONLYOFFICE_URL=http://onlyoffice",
     "CONFIG_SECRET=${var.config_secret}"
   ]
 
@@ -65,7 +65,7 @@ resource "docker_container" "filestash" {
   }
 
   depends_on = [
-    docker_network.filestash,
+    # docker_network.filestash,
     docker_image.filestash
   ]
 }
