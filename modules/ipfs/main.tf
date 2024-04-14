@@ -38,13 +38,13 @@ resource "docker_container" "ipfs" {
 
   mounts {
     type = "bind"
-    source = "/var/lib/docker-data/ipfs/data"
-    target = "/data/ipfs"
+    source = "/var/lib/docker-data/ipfs/blocks"
+    target = "/data/ipfs/blocks"
   }
   mounts {
     type = "bind"
-    source = "/var/lib/docker-data/ipfs/blocks"
-    target = "/data/ipfs/blocks"
+    source = "/var/lib/docker-data/ipfs/data"
+    target = "/data/ipfs"
   }
 
   depends_on = [
