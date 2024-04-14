@@ -23,10 +23,8 @@ resource "docker_container" "homepage" {
 
   env = [
     "PUID=1000",
-    "PGID=978",
+    "PGID=1000",
   ]
-
-  group_add = [var.docker_group_id]
 
   mounts {
     type = "bind"
@@ -43,4 +41,6 @@ resource "docker_container" "homepage" {
     source = "/var/run/docker.sock"
     target = "/var/run/docker.sock"
   }
+
+  group_add = [var.docker_group_id]
 }
