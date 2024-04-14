@@ -1,7 +1,7 @@
 FROM caddy:builder-alpine AS builder
 
 WORKDIR /build
-RUN xcaddy build master \
+RUN xcaddy build v2.7.6 \
     --with github.com/caddy-dns/cloudflare@latest \
     --with github.com/caddyserver/replace-response@latest
 
