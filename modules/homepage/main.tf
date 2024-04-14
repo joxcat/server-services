@@ -26,6 +26,13 @@ resource "docker_container" "homepage" {
     "PGID=978",
   ]
 
+  group_add = [var.docker_group_id]
+
+  mounts {
+    type = "bind"
+    source = abspath("${path.module}/icons")
+    target = "/app/icons"
+  }
   mounts {
     type = "bind"
     source = "/var/lib/docker-data/homepage/config"
