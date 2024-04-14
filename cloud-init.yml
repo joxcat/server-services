@@ -16,6 +16,12 @@ yum_repos:
     name: Docker CE Stable - $basearch
     gpgcheck: 1
     gpgkey: https://download.docker.com/linux/fedora/gpg
+  tailscale:
+    baseurl: https://pkgs.tailscale.com/stable/fedora/$basearch
+    enabled: true
+    name: Tailscale Stable - $basearch
+    gpgcheck: 1
+    gpgkey: https://pkgs.tailscale.com/stable/fedora/repo.gpg
 packages:
   - fail2ban
   - iptables-services
@@ -46,6 +52,7 @@ packages:
   - syncthing
   - zoxide
   - sudo-rs
+  - tailscale
 package_update: true
 package_upgrade: true
 write_files:
@@ -208,6 +215,10 @@ runcmd:
   - sed -i -e '/^\(#\|\)AllowAgentForwarding/s/^.*$/AllowAgentForwarding no/' /etc/ssh/sshd_config
   - sed -i -e '/^\(#\|\)AuthorizedKeysFile/s/^.*$/AuthorizedKeysFile .ssh\/authorized_keys/' /etc/ssh/sshd_config
   - sed -i '$a AllowUsers johan' /etc/ssh/sshd_config
+  # Enable tailscale
+  - systemctl enable tailscaled
+  # Enable syncthing
+  - sudo -u johan sh -c 'systemctl enable --user --now syncthing'
   # Enable and config docker with ipv6
   - systemctl enable docker
   # Install rustup
