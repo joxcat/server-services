@@ -134,7 +134,7 @@ write_files:
 
       [Service]
       Type=exec
-      ExecStart=/usr/bin/sshfs -f {{ env "SFTP_USER" }}@{{ env "SFTP_HOST" }}:/home/ipfs/blocks /var/lib/docker-data/ipfs/blocks -p 23 -o rw,allow_other,idmap=user,uid=1000,gid=1001,ServerAliveInterval=10,ServerAliveCountMax=1,_netdev
+      ExecStart=/usr/bin/sshfs -f {{ env "SFTP_USER" }}@{{ env "SFTP_HOST" }}:/home/ipfs/blocks /var/lib/docker-data/ipfs/blocks -p 23 -o rw,allow_other,idmap=user,uid=1000,gid=100,ServerAliveInterval=10,ServerAliveCountMax=1,_netdev
       ExecStop=/usr/bin/umount /var/lib/docker-data/ipfs/blocks
       Restart=on-failure
       RestartSec=20

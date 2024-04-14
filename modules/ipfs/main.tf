@@ -38,8 +38,8 @@ resource "docker_container" "ipfs" {
 
   mounts {
     type = "bind"
-    source = "/var/lib/docker-data/ipfs/config"
-    target = "/data/ipfs/config"
+    source = "/var/lib/docker-data/ipfs/data"
+    target = "/data/ipfs"
   }
   mounts {
     type = "bind"
