@@ -22,8 +22,7 @@ resource "docker_container" "nocodb" {
   }
 
   env = [
-    "NC_DISABLE_TELE=true",
-    "NC_DB=sqlite:///usr/app/data/nocodb.db"
+    "NC_DISABLE_TELE=true"
   ]
 
   mounts {
