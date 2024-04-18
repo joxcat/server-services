@@ -234,3 +234,13 @@ module "homepage" {
   network = docker_network.internal_proxy.id
   docker_group_id = "978"
 }
+
+module "n8n" {
+  source = "./modules/n8n"
+  network = docker_network.internal_proxy.id
+}
+
+module "nocodb" {
+  source = "./modules/nocodb"
+  network = docker_network.internal_proxy.id
+}

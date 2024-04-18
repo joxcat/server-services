@@ -29,7 +29,12 @@ resource "docker_container" "homepage" {
   mounts {
     type = "bind"
     source = abspath("${path.module}/icons")
-    target = "/app/icons"
+    target = "/app/public/icons"
+  }
+  mounts {
+    type = "bind"
+    source = abspath("${path.module}/images")
+    target = "/app/public/images"
   }
   mounts {
     type = "bind"
