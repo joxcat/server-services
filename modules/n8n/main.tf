@@ -24,6 +24,7 @@ resource "docker_container" "n8n" {
   env = [
     "GENERIC_TIMEZONE=Europe/Paris",
     "N8N_EDITOR_BASE_URL=${var.base_url}",
+    "WEBHOOK_URL=${var.base_url}",
     "TZ=Europe/Paris"
   ]
 
