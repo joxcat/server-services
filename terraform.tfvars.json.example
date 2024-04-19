@@ -49,5 +49,6 @@
     "concourse_main_team_local_user": "",
     "flowise_username": "",
     "flowise_password": "",
-    "tailscale_auth_key": ""
+    "tailscale_auth_key": "",
+    "n8n_base_url": ""
 }

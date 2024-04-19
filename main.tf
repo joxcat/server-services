@@ -238,6 +238,8 @@ module "homepage" {
 module "n8n" {
   source = "./modules/n8n"
   network = docker_network.internal_proxy.id
+
+  base_url = var.n8n_base_url
 }
 
 module "nocodb" {

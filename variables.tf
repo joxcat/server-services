@@ -179,3 +179,9 @@ variable "tailscale_auth_key" {
   description = "Tailscale auth key"
   type = string
 }
+
+# n8n
+variable "n8n_base_url" {
+  description = "n8n base url"
+  type = string
+} 
