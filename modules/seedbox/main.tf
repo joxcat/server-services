@@ -48,6 +48,9 @@ resource docker_container "flood" {
   restart = "unless-stopped"
   user = "1000:1001"
 
+  memory = 512
+  memory_swap = 512
+
   env = [ "HOME=/config" ]
   command = [
     "--port", "3001",
@@ -83,6 +86,9 @@ resource docker_container "radarr" {
   image = docker_image.radarr.image_id
   restart = "unless-stopped"
 
+  memory = 512
+  memory_swap = 512
+
   env = [ "PUID=1000", "PGID=1001", "TZ=Europe/Paris" ]
 
   networks_advanced {
@@ -117,6 +123,9 @@ resource docker_container "sonarr" {
   image = docker_image.sonarr.image_id
   restart = "unless-stopped"
 
+  memory = 512
+  memory_swap = 512
+
   env = [ "PUID=1000", "PGID=1001", "TZ=Europe/Paris" ]
 
   networks_advanced {
@@ -150,6 +159,9 @@ resource docker_container "prowlarr" {
   hostname = "seedbox_prowlarr"
   image = docker_image.prowlarr.image_id
   restart = "unless-stopped"
+
+  memory = 512
+  memory_swap = 512
 
   env = [ "PUID=1000", "PGID=1001", "TZ=Europe/Paris" ]
 
@@ -202,8 +214,8 @@ resource docker_container "rtorrent" {
   env = [ "HOME=/config" ]
   command = [ "-o", "system.daemon.set=true" ]
 
-  memory = 5120
-  memory_swap = 8192
+  memory = 2048
+  memory_swap = 2048
 
   ports {
     external = "6881"
@@ -235,6 +247,9 @@ resource docker_container "jellyfin" {
   hostname = "seedbox_jellyfin"
   image = docker_image.jellyfin.image_id
   restart = "unless-stopped"
+
+  cpu_set = "0-1"
+  cpu_shares = "1280" // Default to 1024
   
   env = [
     "PUID=1000",

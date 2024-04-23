@@ -40,6 +40,9 @@ resource "docker_container" "ollama_webui" {
   image = docker_image.ollama_webui.image_id
   restart = "unless-stopped"
 
+  memory = 512
+  memory_swap = 512
+
   env = [ "OLLAMA_API_BASE_URL=http://ollama:11434/api" ]
 
   networks_advanced {
