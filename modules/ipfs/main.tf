@@ -8,7 +8,7 @@ terraform {
 }
 
 resource "docker_image" "ipfs" {
-  name = "ipfs/kubo:latest"
+  name = "ipfs/kubo:v0.28.0"
 }
 
 resource "docker_container" "ipfs" {
