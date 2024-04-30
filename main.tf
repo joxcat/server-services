@@ -246,3 +246,8 @@ module "nocodb" {
   source = "./modules/nocodb"
   network = docker_network.internal_proxy.id
 }
+
+module "archivebox" {
+  source = "./modules/archivebox"
+  network = docker_network.internal_proxy.id
+}
