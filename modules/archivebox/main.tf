@@ -20,12 +20,14 @@ resource "docker_container" "archivebox" {
   env = [
     # "ADMIN_USERNAME=",
     # "ADMIN_PASSWORD=",
-    "ALLOWED_HOSTS=archive.planchon.dev",
+    "ALLOWED_HOSTS=archive.fronce.fr",
     "PUBLIC_INDEX=True",
     "PUBLIC_SNAPSHOTS=True",
     "PUBLIC_ADD_VIEW=False",
     "CHECK_SSL_VALIDITY=False",
-    "SAVE_ARCHIVE_DOT_ORG=True"
+    "SAVE_ARCHIVE_DOT_ORG=True",
+    "PUID=1000",
+    "PGID=1001"
   ]
 
   networks_advanced {
