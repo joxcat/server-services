@@ -26,8 +26,8 @@ resource "docker_container" "archivebox" {
     "PUBLIC_ADD_VIEW=False",
     "CHECK_SSL_VALIDITY=False",
     "SAVE_ARCHIVE_DOT_ORG=True",
-    "PUID=1000",
-    "PGID=1001"
+    "PUID=911",
+    "PGID=911"
   ]
 
   networks_advanced {
@@ -36,8 +36,13 @@ resource "docker_container" "archivebox" {
 
   mounts {
     type = "bind"
-    source = "/var/lib/docker-data/archivebox/data"
+    source = "/var/lib/docker-data/archivebox/state"
     target = "/data"
+  }
+  mounts {
+    type = "bind"
+    source = "/var/lib/docker-data/archivebox/data"
+    target = "/data/archive"
   }
 
   depends_on = [ docker_image.archivebox ]
