@@ -8,13 +8,13 @@ terraform {
 }
 
 resource "docker_image" "forgejo" {
-  name = "codeberg.org/forgejo/forgejo:1.21.5-0"
+  name = "codeberg.org/forgejo/forgejo:7.0.2"
 }
 resource "docker_image" "dind" {
   name = "docker:dind"
 }
 resource "docker_image" "forgejo_runner" {
-  name = "code.forgejo.org/forgejo/runner:3.3.0"
+  name = "code.forgejo.org/forgejo/runner:3.4.1"
 }
 
 resource "docker_network" "internal_forgejo" {
