@@ -251,3 +251,8 @@ module "archivebox" {
   source = "./modules/archivebox"
   network = docker_network.internal_proxy.id
 }
+
+module "pihole" {
+  source = "./modules/pihole"
+  network = docker_network.internal_proxy.id
+}
