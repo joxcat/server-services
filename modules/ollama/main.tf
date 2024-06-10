@@ -8,7 +8,7 @@ terraform {
 }
 
 resource "docker_image" "ollama_webui" {
-  name = "ghcr.io/open-webui/open-webui:v0.1.120"
+  name = "ghcr.io/open-webui/open-webui:v0.3.1"
 }
 
 resource "docker_image" "ollama" {

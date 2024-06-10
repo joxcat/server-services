@@ -8,7 +8,7 @@ terraform {
 }
 
 resource "docker_image" "umami" {
-  name = "ghcr.io/umami-software/umami:postgresql-latest"
+  name = "ghcr.io/umami-software/umami:postgresql-v2.11.3"
 }
 resource "docker_image" "umami_postgres" {
   name = "postgres:15-alpine"
