@@ -73,6 +73,7 @@ module "searx" {
   host = var.searx_host
 }*/
 
+/* // NOTE: Disabling temporarily not used
 module "coder" {
   source = "./modules/coder"
   network = docker_network.internal_proxy.id
@@ -81,7 +82,7 @@ module "coder" {
   access_url = var.coder_access_url
   wildcard_url = var.coder_wildcard_url
   docker_group_id = "978"
-}
+}*/
 
 /* // Not used, too much support needed
 module "pterodactyl" {
@@ -97,10 +98,11 @@ module "pterodactyl" {
   smtp_password = var.pterodactyl_smtp_password
 } */
 
+/* //  NOTE: Disabled temporarily not using it anymore
 module "ipfs" {
   source = "./modules/ipfs"
   network = docker_network.internal_proxy.id
-}
+}*/
 
 /* // Near 1G of RAM usage wtf
 module "kroki" {
@@ -252,7 +254,8 @@ module "archivebox" {
   network = docker_network.internal_proxy.id
 }
 
+/* // NOTE: Wrongly configured need investivation
 module "pihole" {
   source = "./modules/pihole"
   network = docker_network.internal_proxy.id
-}
+}*/
