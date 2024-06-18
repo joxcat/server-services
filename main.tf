@@ -254,8 +254,13 @@ module "archivebox" {
   network = docker_network.internal_proxy.id
 }
 
-/* // NOTE: Wrongly configured need investivation
+/* // Dangerous to run in public 
 module "pihole" {
   source = "./modules/pihole"
   network = docker_network.internal_proxy.id
 }*/
+
+module "dokku" {
+  source = "./modules/dokku"
+  network = docker_network.internal_proxy.id
+}

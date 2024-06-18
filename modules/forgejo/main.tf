@@ -10,16 +10,16 @@ terraform {
 resource "docker_image" "forgejo" {
   name = "codeberg.org/forgejo/forgejo:7.0.2"
 }
-resource "docker_image" "dind" {
+/*resource "docker_image" "dind" {
   name = "docker:dind"
 }
 resource "docker_image" "forgejo_runner" {
   name = "code.forgejo.org/forgejo/runner:3.4.1"
-}
+}*/
 
-resource "docker_network" "internal_forgejo" {
+/*resource "docker_network" "internal_forgejo" {
   name = "internal_forgejo"
-}
+}*/
 
 resource "docker_container" "forgejo" {
   name = "forgejo"
@@ -29,17 +29,17 @@ resource "docker_container" "forgejo" {
 
   env = [ "USER_UID=1000", "USER_GID=1000" ]
 
-  ports {
+  /*ports {
     internal = 22
     external = 22
-  }
+  }*/
 
   networks_advanced {
     name = var.network
   }
-  networks_advanced {
+  /*networks_advanced {
     name = docker_network.internal_forgejo.id
-  }
+  }*/
 
   mounts {
     type = "bind"
@@ -65,7 +65,7 @@ resource "docker_container" "forgejo" {
   ]
 }
 
-resource "docker_container" "forgejo_dind" {
+/*resource "docker_container" "forgejo_dind" {
   name = "forgejo_dind"
   hostname = "forgejo_dind"
   image = docker_image.dind.image_id
@@ -81,8 +81,9 @@ resource "docker_container" "forgejo_dind" {
     docker_image.dind,
     docker_network.internal_forgejo
   ]
-}
+}*/
 
+/* Disabled not used
 resource "docker_container" "forgejo_runner" {
   name = "forgejo_runner"
   hostname = "forgejo_runner"
@@ -109,4 +110,4 @@ resource "docker_container" "forgejo_runner" {
     docker_container.forgejo_dind,
     docker_network.internal_forgejo
   ]
-}
+}*/
